@@ -65,28 +65,56 @@ python tests/run_pretrained_models.py --backend caffe2 --config tests/resnet_v2_
 
 caffe2 error:
 
- warnings.warn("This version of onnx-caffe2 targets ONNX operator set version {}, but the model we are trying to import uses version {}.  We will try to import it anyway, but if the model uses operators which had BC-breaking changes in the intervening versions, import will fail.".format(cls._known_opset_version, imp.version))
+warnings.warn("This version of onnx-caffe2 targets ONNX operator set version {}, but the model we are trying to import uses version {}.  We will try to import it anyway, but if the model uses operators which had BC-breaking changes in the intervening versions, import will fail.".format(cls._known_opset_version, imp.version))
 ONNX FATAL: [enforce fail at backend.cc:653] . Caffe2 only supports padding 2D Tensor, whereas padding is [0, 3, 3, 0, 0, 3, 3, 0, ] 
 ONNX FATAL: [enforce fail at backend.cc:653] . Caffe2 only supports padding 2D Tensor, whereas padding is [0, 1, 1, 0, 0, 1, 1, 0, ] 
 ONNX FATAL: [enforce fail at backend.cc:653] . Caffe2 only supports padding 2D Tensor, whereas padding is [0, 1, 1, 0, 0, 1, 1, 0, ] 
 ONNX FATAL: [enforce fail at backend.cc:653] . Caffe2 only supports padding 2D Tensor, whereas padding is [0, 1, 1, 0, 0, 1, 1, 0, ] 
 	run_onnx FAIL ONNX conversion failed
-
+:x
 ---
 resnet_v1_50:
 
+python tests/run_pretrained_models.py --backend caffe2 --config tests/resnet_v1_50.yaml  --onnx-file resnet_v1_50
 
-python tests/run_pretrained_models.py --backend caffe2 --config tests/resnet_v1_50.yaml  --onnx-file resnet_v1_50  OK
+
+tf2onnx.convert:
+
+python -m tf2onnx.convert --input frozen_resnet_v1_50.pb --inputs input:0 --outputs resnet_v1_50/logits/BiasAdd:0 --output resnet_v1_50_model.onnx
+python -m tf2onnx.convert --input frozen_resnet_v1_50.pb --inputs input:0 --outputs resnet_v1_50/logits/BiasAdd:0 --output resnet_v1_no_fu.onnx
+
+
+   
+
+
+
+
+
+
 
 不做图像归一化处理，5 维的 [0][0][0] 才能输出 index   1000 类  479 +2 481 carwheel
 
-/data1/train_disk1/Train_tools/pytorch/build/caffe2/python/onnx/backend.py:728: UserWarning: This version of onnx-caffe2 targets ONNX operator set version 6, but the model we are trying to import uses version 8.  We will try to import it anyway, but if the model uses operators which had BC-breaking changes in the intervening versions, import will fail.
-  warnings.warn("This version of onnx-caffe2 targets ONNX operator set version {}, but the model we are trying to import uses version {}.  We will try to import it anyway, but if the model uses operators which had BC-breaking changes in the intervening versions, import will fail.".format(cls._known_opset_version, imp.version))
-ONNX FATAL: [enforce fail at backend.cc:653] . Caffe2 only supports padding 2D Tensor, whereas padding is [0, 3, 3, 0, 0, 3, 3, 0, ] 
-ONNX FATAL: [enforce fail at backend.cc:653] . Caffe2 only supports padding 2D Tensor, whereas padding is [0, 1, 1, 0, 0, 1, 1, 0, ] 
-ONNX FATAL: [enforce fail at backend.cc:653] . Caffe2 only supports padding 2D Tensor, whereas padding is [0, 1, 1, 0, 0, 1, 1, 0, ] 
-ONNX FATAL: [enforce fail at backend.cc:653] . Caffe2 only supports padding 2D Tensor, whereas padding is [0, 1, 1, 0, 0, 1, 1, 0, ] 
-	run_onnx FAIL ONNX conversion failed
+换一种 freeze graph 的方式，
+frzee_graph:
+
+
+resnet_v2_50:
+  model: tests/models/resnet_v2_50/frozen_resnet_v2_50.pb
+  input_get: get_beach
+  inputs:
+    "input:0": [1, 224, 224, 3]
+  outputs:
+    - resnet_v2_50/logits/BiasAdd:0
+
+
+sudo python -m tensorflow.python.tools.freeze_graph \
+    --input_graph=pb_model/model.pb \
+    --input_binary=false \
+    --input_names=input:0 \
+    --output_node_names=resnet_v2_50/logits/BiasAdd \
+    --input_checkpoint=resnet_v2_50.ckpt \
+    --output_graph=frozen_graph.pb
+
 
 
 --------------------------------------------
