@@ -1,0 +1,178 @@
+3DBall:
+  check_only_shape: true
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/3DBall/TFModels/3DBall.bytes
+  model: 3DBall.bytes
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [1, 24]
+  outputs:
+    - action:0
+
+3DBallHard:
+  # needs: lstm
+  disabled: true
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/3DBall/TFModels/3DBallHard.bytes
+  model: 3DBallHard.bytes
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [1, 25]
+    "recurrent_in:0": [1, 256]
+    "sequence_length:0": [256]
+  outputs:
+    - action:0
+
+BananaIL:
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/BananaCollectors/TFModels/BananaIL.bytes
+  model: BananaIL.bytes
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [1, 159]
+  outputs:
+    - action:0
+
+BananaRL:
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/BananaCollectors/TFModels/BananaRL.bytes
+  model: BananaRL.bytes
+  check_only_shape: true
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [1, 159]
+  outputs:
+    - action_probs:0
+    - value_estimate:0
+
+Basic:
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/Basic/TFModels/Basic.bytes
+  model: Basic.bytes
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [10, 1]
+  outputs:
+    - action:0
+    - action_probs:0
+    - value_estimate:0
+
+Bouncer:
+  check_only_shape: true
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/Bouncer/TFModels/Bouncer.bytes
+  model: Bouncer.bytes
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [1, 18]
+  outputs:
+    - action_probs:0
+    - value_estimate:0
+
+crawler:
+  check_only_shape: true
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/Crawler/TFModels/crawler.bytes
+  model: crawler.bytes
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [1, 117]
+  outputs:
+    - action_probs:0
+    - value_estimate:0
+
+GridWorld_3x3:
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/GridWorld/TFModels/GridWorld_3x3.bytes
+  model: GridWorld_3x3.bytes
+  check_only_shape: true
+  input_get: get_random
+  inputs:
+    "visual_observation_0:0": [1, 84, 84, 3]
+  outputs:
+    - action_probs:0
+    - value_estimate:0
+    - action:0
+
+GridWorld_5x5:
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/GridWorld/TFModels/GridWorld_5x5.bytes
+  model: GridWorld_5x5.bytes
+  input_get: get_random
+  check_only_shape: true
+  inputs:
+    "visual_observation_0:0": [1, 84, 84, 3]
+  outputs:
+    - action_probs:0
+    - value_estimate:0
+    - action:0
+
+Hallway:
+  # needs: lstm
+  disabled: true
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/Hallway/TFModels/Hallway.bytes
+  model: Hallway.bytes
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [1, 36]
+    "recurrent_in:0": [1, 256]
+    "sequence_length:0": [256]
+    "prev_action:0": [1]
+  outputs:
+    - action_probs:0
+    - value_estimate:0
+    - action:0
+
+PushBlock:
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/PushBlock/TFModels/PushBlock.bytes
+  model: PushBlock.bytes
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [1, 210]
+  outputs:
+    - action_probs:0
+    - value_estimate:0
+    - action:0
+
+Reacher:
+  check_only_shape: true
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/Reacher/TFModels/Reacher.bytes
+  model: Reacher.bytes
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [1, 78]
+  outputs:
+    - value_estimate:0
+    - action:0
+
+Soccer:
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/Soccer/TFModels/Soccer.bytes
+  model: Soccer.bytes
+  check_only_shape: true
+  input_get: get_random
+  inputs:
+    "GoalieBrain/vector_observation:0": [1, 336]
+    "StrikerBrain/vector_observation:0": [1, 336]
+  outputs:
+    - GoalieBrain/action_probs:0
+    - GoalieBrain/action:0
+    - GoalieBrain/value_estimate:0
+    - StrikerBrain/action_probs:0
+    - StrikerBrain/action:0
+    - StrikerBrain/value_estimate:0
+
+Tennis:
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/Tennis/TFModels/Tennis.bytes
+  model: Tennis.bytes
+  input_get: get_random
+  inputs:
+    "vector_observation:0": [1, 24]
+  outputs:
+    - value_estimate:0
+
+WallJump:
+  url: https://github.com/Unity-Technologies/ml-agents/raw/master/unity-environment/Assets/ML-Agents/Examples/WallJump/TFModels/WallJump.bytes
+  model: WallJump.bytes
+  check_only_shape: true
+  input_get: get_random
+  inputs:
+    "SmallWallBrain/vector_observation:0": [1, 444]
+    "BigWallBrain/vector_observation:0": [1, 444]
+  outputs:
+    - SmallWallBrain/action_probs:0
+    - SmallWallBrain/action:0
+    - SmallWallBrain/value_estimate:0
+    - BigWallBrain/action_probs:0
+    - BigWallBrain/action:0
+    - BigWallBrain/value_estimate:0

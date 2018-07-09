@@ -1,0 +1,431 @@
+resnet_v1_50
+	downloaded tests/models/resnet_v1_50/pb_model/frozen_resnet_v1_50.pb
+name: input:0 shape: [1, 224, 224, 3]
+resize_to: [224, 224]
+run_tensorflow(): so we have a reference output
+result: [array([[[[-2.69367433e+00,  3.68192136e-01, -3.22915816e+00,
+          -1.31845534e+00, -6.27912283e-01, -1.24540424e+00,
+          -1.25141263e+00,  3.11225951e-01, -5.90065181e-01,
+          -1.73504686e+00, -3.87296510e+00, -1.18293977e+00,
+          -1.84581503e-01, -3.48303270e+00, -2.45558786e+00,
+          -3.02786541e+00, -2.31565759e-01,  2.58283466e-01,
+          -3.34668303e+00, -5.55051148e-01, -3.47126317e+00,
+          -3.47843075e+00, -1.82401001e+00,  8.51500332e-01,
+          -2.19138360e+00, -1.52649045e+00, -3.98520756e+00,
+          -1.81276262e+00, -7.03616500e-01, -2.37011701e-01,
+          -2.51836729e+00, -1.42606115e+00, -1.04198903e-01,
+          -1.82981157e+00, -2.43777347e+00, -3.55468535e+00,
+          -1.68191683e+00, -2.30565095e+00, -2.43797255e+00,
+          -1.33964980e+00, -2.59835577e+00, -2.47454762e+00,
+           3.03798348e-01, -1.99986827e+00, -2.64872932e+00,
+          -5.83072364e-01, -1.30792940e+00, -2.40721798e+00,
+          -2.33823061e+00, -3.76127791e+00, -3.38713139e-01,
+          -3.70386434e+00, -2.78676414e+00, -3.24099183e+00,
+          -3.26039672e+00, -3.40075707e+00, -3.29771113e+00,
+          -2.50125670e+00, -1.99147475e+00, -3.45830297e+00,
+          -1.62970293e+00, -2.08774042e+00, -2.88227820e+00,
+          -4.73089790e+00, -3.63398671e+00, -1.68811047e+00,
+          -2.70643067e+00, -2.00317407e+00, -3.28343987e+00,
+          -4.26810646e+00, -4.55483294e+00,  5.57762027e-01,
+          -2.41099262e+00,  1.41806275e-01, -6.15390778e-01,
+          -1.78398418e+00,  6.46955371e-02, -2.65596770e-02,
+           5.59432507e-02, -1.14901972e+00, -3.51054573e+00,
+          -4.22755194e+00, -5.78320563e-01, -2.02534243e-01,
+          -2.02689004e+00, -3.53124976e+00, -2.23170209e+00,
+          -1.96257579e+00,  4.82812934e-02, -2.50254226e+00,
+          -2.68998837e+00, -1.19496310e+00, -3.29222858e-01,
+          -5.29863089e-02, -3.06018263e-01, -3.03554964e+00,
+          -6.78048491e-01, -1.16514194e+00, -1.27451861e+00,
+          -2.01451468e+00, -2.45236731e+00, -1.09459579e+00,
+          -2.18641543e+00, -1.44621527e+00, -5.63079119e-01,
+          -1.91498113e+00, -4.10126448e+00, -7.48447239e-01,
+          -2.77368164e+00, -2.44422555e+00, -3.32279682e+00,
+          -2.11142492e+00, -7.56166458e-01, -4.10829115e+00,
+          -1.52941740e+00, -1.50630152e+00, -3.02596498e+00,
+          -2.14101434e+00, -2.01625705e+00, -2.94086289e+00,
+          -2.34085178e+00, -2.58291364e+00, -6.58451319e-01,
+          -2.01077509e+00, -5.44932485e-01, -1.78697586e+00,
+          -2.41677260e+00, -3.34645241e-01, -4.46512175e+00,
+          -3.49087924e-01, -2.68965364e+00, -9.30949569e-01,
+          -2.29504347e+00, -6.68781638e-01, -2.40687323e+00,
+          -1.33993125e+00, -2.29936433e+00, -3.06978846e+00,
+          -4.04920149e+00, -4.57994938e+00, -2.03023148e+00,
+          -3.82257867e+00, -3.44271040e+00, -2.67695761e+00,
+          -9.41707551e-01,  2.27460489e-01, -2.24071813e+00,
+          -1.82845259e+00, -2.24553895e+00, -1.47704268e+00,
+          -1.22671163e+00,  2.47074795e+00,  4.03979158e+00,
+           1.72265947e+00,  6.13347673e+00,  1.90520692e+00,
+           3.12239122e+00,  3.43565583e+00,  1.99990249e+00,
+           4.98719645e+00,  8.05377293e+00,  3.49533749e+00,
+           1.54743767e+00,  1.98028553e+00,  1.12163484e+00,
+           7.56111145e-01,  2.41180086e+00,  2.38710499e+00,
+           3.86173701e+00,  7.16177177e+00,  5.64397383e+00,
+           9.80500817e-01,  4.72786456e-01,  3.08538866e+00,
+           2.60073447e+00,  8.03133774e+00,  7.83663082e+00,
+           5.14636230e+00,  4.47011185e+00, -1.98891795e+00,
+          -6.60451055e-01,  8.84796023e-01,  2.18334627e+00,
+           5.43057621e-01,  4.85235119e+00,  5.77241421e+00,
+           3.06617141e+00,  2.47597933e+00,  2.33125830e+00,
+           2.37889743e+00,  1.10218346e+00,  3.30169868e+00,
+           2.92458439e+00,  5.06731129e+00,  2.34141159e+00,
+          -1.30877793e-01,  5.04951894e-01,  1.34291840e+00,
+           4.67722178e-01,  3.22739863e+00,  5.53978252e+00,
+           2.54374146e+00,  2.89319801e+00,  1.39361513e+00,
+           3.38100505e+00,  1.18122396e+01,  7.11142445e+00,
+           1.91654568e+01,  7.30683756e+00,  4.36974335e+00,
+          -2.95263708e-01,  5.28007984e+00,  1.02388296e+01,
+           1.12640877e+01,  9.26065636e+00,  9.43146706e+00,
+           8.96199417e+00,  4.36244011e+00,  8.73809814e+00,
+           8.94979000e+00,  8.52746773e+00,  3.02707434e+00,
+           1.02995930e+01,  2.93474960e+00,  7.85862970e+00,
+           2.17317700e+00,  5.03586769e+00,  3.65463543e+00,
+           2.19706297e+00,  3.16568708e+00,  6.53291845e+00,
+           8.41647816e+00,  8.83578110e+00, -5.09841561e-01,
+           1.42431855e+00,  4.27605963e+00,  1.49290669e+00,
+          -1.65361488e+00,  4.30465555e+00,  6.98357487e+00,
+           2.81768847e+00,  3.59284854e+00, -1.13990866e-01,
+          -1.25548577e+00,  5.62808561e+00, -3.48143578e+00,
+           9.72954810e-01,  5.66098690e+00,  3.68683887e+00,
+           1.13429987e+00,  1.15635478e+00,  2.74527645e+00,
+           1.54900634e+00,  1.29300344e+00,  2.58723974e-01,
+           8.97291470e+00,  9.68011856e+00,  8.57849407e+00,
+           6.29621792e+00,  4.43110466e+00,  4.56466198e+00,
+           2.31275558e+00,  6.60811603e-01,  6.49816275e+00,
+           3.23432541e+00,  6.30764663e-01,  3.26787186e+00,
+           6.48153734e+00, -7.13368595e-01,  1.59147763e+00,
+           4.33006716e+00,  2.78103161e+00,  7.53242016e-01,
+           3.10706472e+00, -2.41658300e-01,  3.60937595e-01,
+           4.33003187e+00, -2.08702326e+00, -3.09102178e+00,
+           5.05746067e-01, -2.45639229e+00,  7.82422364e-01,
+           7.73805857e-01,  1.69772184e+00, -1.21480775e+00,
+          -2.09656194e-01, -3.34912515e+00, -2.52064753e+00,
+          -1.10168922e+00, -1.13782513e+00, -3.29225254e+00,
+           4.22365999e+00,  1.61368996e-01,  1.26966679e+00,
+           2.17339063e+00, -3.23892736e+00,  3.47563815e+00,
+          -1.93058684e-01,  1.29983760e-02,  1.14465311e-01,
+          -1.38402784e+00,  9.40948129e-02, -1.03953278e+00,
+          -1.15760982e+00, -5.93560696e-01,  3.56521845e-01,
+          -4.59685445e-01, -8.37025762e-01, -1.61713278e+00,
+          -4.61257160e-01, -1.12320340e+00, -6.15008712e-01,
+          -2.08971882e+00, -6.60212159e-01, -5.96706212e-01,
+          -2.69677567e+00, -3.09397626e+00,  4.13893849e-01,
+          -2.43750596e+00, -1.45070767e+00, -2.79063076e-01,
+          -2.65995002e+00, -2.62638545e+00, -2.20738912e+00,
+          -2.45822763e+00, -1.15154636e+00, -3.28793216e+00,
+          -1.17386818e+00, -2.68397784e+00, -2.67677855e+00,
+          -1.84179604e+00,  2.66487092e-01, -1.29459321e+00,
+           3.00139952e+00, -7.58447289e-01, -2.19281554e-01,
+          -6.43567145e-01, -1.33275282e+00,  1.67032588e+00,
+           1.83188093e+00, -4.50323641e-01, -3.01865435e+00,
+          -2.88859534e+00, -2.99937367e+00, -4.29406643e+00,
+           2.44447678e-01,  1.51147449e+00, -8.46012652e-01,
+          -3.49142514e-02, -3.08827686e+00, -1.38134897e+00,
+          -3.50148392e+00, -1.32515371e+00, -2.45385504e+00,
+           2.37287545e+00,  4.42644548e+00, -1.36326706e+00,
+          -1.36532676e+00, -2.30143809e+00, -1.90233803e+00,
+          -6.41398847e-01, -6.14654720e-01, -8.52574587e-01,
+          -6.05174899e-01, -1.37951171e+00, -1.61732599e-01,
+          -2.76033425e+00, -1.57474911e+00,  1.03029752e+00,
+          -8.53838146e-01, -1.40213716e+00,  6.90073073e-02,
+           5.87757409e-01, -2.39423942e-03, -1.86443210e-01,
+          -2.72065711e+00, -8.81652355e-01,  2.92317796e+00,
+          -1.68873847e-01,  1.32968497e+00, -2.53040977e-02,
+          -3.03435922e-01, -9.57644105e-01, -3.68012857e+00,
+          -2.82653928e+00, -2.48179078e+00, -2.11862278e+00,
+          -3.04769993e+00, -2.44264770e+00, -1.35191309e+00,
+          -3.54527831e+00, -3.50848049e-01, -2.23520184e+00,
+          -1.46669555e+00, -2.28148794e+00, -8.67897272e-01,
+          -2.76218081e+00, -7.66415149e-03, -3.58776045e+00,
+          -5.60025513e-01,  3.18612546e-01,  4.59526151e-01,
+           6.87183142e-02, -2.20287848e+00, -2.46893406e+00,
+           2.14062288e-01, -2.44332623e+00,  3.78278255e-01,
+          -4.59347516e-01,  2.42182946e+00, -2.90177011e+00,
+           1.26451254e+00,  3.69304585e+00, -2.00058270e+00,
+           1.77398235e-01, -7.48821318e-01, -1.21454406e+00,
+           3.15565133e+00,  8.66534710e-01,  6.87575281e-01,
+           2.93108225e-02,  4.85576056e-02,  1.00579858e+00,
+          -2.20084643e+00, -2.89586759e+00, -8.65598619e-01,
+           2.85727644e+00,  1.87170935e+00,  3.66662145e+00,
+           5.14297187e-01,  7.81022191e-01, -3.88719514e-02,
+          -1.28624618e+00,  1.48127162e+00,  5.40967846e+00,
+           6.08410776e-01, -1.58302665e+00,  1.19357848e+00,
+          -1.60178590e+00, -6.63459480e-01,  2.07566547e+00,
+          -6.28417909e-01,  2.34093022e+00, -7.41183877e-01,
+           1.31611332e-01,  1.99575019e+00,  1.87360212e-01,
+          -5.35121202e-01, -8.39044511e-01,  4.12661433e-02,
+          -1.50177014e+00,  3.75040472e-01,  1.02830432e-01,
+          -2.31198525e+00, -1.33799529e+00,  3.14057851e+00,
+           4.80945647e-01,  2.61576700e+00, -1.08305156e+00,
+           1.16660917e+00,  1.29746959e-01, -2.29220605e+00,
+           2.02214789e+00,  5.11732054e+00,  6.60471022e-01,
+          -2.55640894e-01, -1.80901468e+00, -2.73706150e+00,
+           3.89986724e-01, -2.19638801e+00, -5.64963996e-01,
+          -1.16805768e+00,  3.52437925e+00, -2.61832213e+00,
+          -3.48613024e+00,  1.40948486e+00,  1.68595040e+00,
+          -1.17073643e+00, -2.90224522e-01, -1.83086693e-01,
+          -1.04797196e+00, -1.38006401e+00, -1.63493538e+00,
+          -2.14889145e+00, -6.52085245e-01, -1.57531083e+00,
+          -1.29225373e+00, -2.26956308e-01,  1.18662798e+00,
+           4.64069277e-01, -1.61394358e+00,  1.76842320e+00,
+          -1.11038470e+00, -2.99599981e+00, -5.61606109e-01,
+          -2.90085554e+00, -4.54922348e-01, -7.78402030e-01,
+           1.66346085e+00, -9.16503787e-01, -4.55679953e-01,
+           1.03378856e+00, -8.71753514e-01,  1.65586427e-01,
+          -4.32661712e-01, -3.27951640e-01, -1.84290743e+00,
+          -2.48759842e+00,  5.82415998e-01, -1.22609043e+00,
+          -7.47540951e-01, -4.78581309e-01, -7.12683098e-03,
+          -5.11397362e-01,  1.27176416e+00,  1.10146201e+00,
+          -1.03684032e+00, -1.20354223e+00,  4.87456381e-01,
+           1.90516770e+00, -2.83157516e+00, -6.95728362e-01,
+           2.09211016e+00,  9.30206358e-01, -1.30369544e+00,
+          -7.01668441e-01, -8.65256667e-01, -9.26265180e-01,
+           1.62729049e+00, -1.29757142e+00,  2.33770680e+00,
+           1.88846874e+00, -2.48061275e+00, -3.93350214e-01,
+           1.77494097e+00, -2.07152343e+00, -2.82070845e-01,
+           3.49955845e+00, -6.86228275e-01,  4.74685192e+00,
+          -8.33784759e-01,  7.39362180e-01,  5.53034663e-01,
+           3.53179789e+00, -5.54848127e-02,  4.93425786e-01,
+           4.95392114e-01, -2.06293082e+00, -2.67800379e+00,
+           1.29724872e+00, -2.53218555e+00,  2.10121298e+00,
+           3.83555746e+00, -5.51165700e-01,  4.25521702e-01,
+          -4.82828438e-01, -4.96061236e-01,  1.17040491e+00,
+           1.11452289e-01,  8.76264274e-01, -1.23017931e+00,
+           3.66325900e-02,  9.77995917e-02, -1.59598780e+00,
+          -2.05067110e+00, -9.78930116e-01, -4.15005535e-01,
+           9.94384766e-01,  7.83850610e-01, -5.01985013e-01,
+           3.03451438e-03,  9.17884588e-01, -2.54837811e-01,
+          -1.64553702e+00, -8.76241550e-03,  7.08095431e-01,
+          -1.17903090e+00,  8.79191458e-01,  3.71063733e+00,
+           3.04179788e-01, -1.39178419e+00, -8.64955187e-01,
+          -7.35778511e-01, -1.19967151e+00, -5.01919806e-01,
+           2.34837723e+00, -2.60322285e+00, -1.27114519e-01,
+           1.62242866e+00,  4.53419828e+00, -1.12101507e+00,
+          -4.74541456e-01, -5.09502828e-01, -1.63275495e-01,
+           9.79111552e-01, -9.86608326e-01,  1.44410038e+00,
+           1.05136657e+00, -1.09195459e+00, -1.77406394e+00,
+          -8.37802649e-01,  1.02526808e+00, -1.78477252e+00,
+          -1.00498128e+00, -9.97824490e-01, -1.13499093e+00,
+           2.29306906e-01,  2.14636922e-01,  1.91905212e+00,
+           1.27711403e+00,  3.10980511e+00, -1.06806004e+00,
+          -1.73060739e+00, -1.07110298e+00, -1.23916292e+00,
+           2.12725306e+00,  6.76732838e-01,  5.79131186e-01,
+          -6.79329097e-01,  5.75243652e-01,  5.66131771e-01,
+          -2.56136090e-01,  3.19106555e+00, -7.52286464e-02,
+          -2.80551195e+00, -1.73321843e-01,  1.15644765e+00,
+          -1.77950275e+00, -1.52307379e+00,  2.42577028e+00,
+          -1.42543817e+00, -3.01314682e-01, -1.75968683e+00,
+           7.36415446e-01, -7.50695527e-01, -1.22370040e+00,
+           3.42275769e-01,  8.40660572e-01,  2.44835043e+00,
+           1.96689463e+00, -2.17523146e+00,  1.30126953e+00,
+          -2.55750918e+00,  2.09308290e+00, -7.79386818e-01,
+          -9.53063130e-01, -7.56019473e-01, -3.10324222e-01,
+          -2.72071958e+00, -9.60998893e-01,  1.35283387e+00,
+           6.91729724e-01, -1.83779204e+00, -1.30680966e+00,
+          -7.15138137e-01,  2.19255304e+00, -1.53668642e+00,
+          -1.10567117e+00, -7.56204486e-01, -2.21132681e-01,
+          -4.22259957e-01, -2.25479174e+00, -6.60370886e-01,
+          -9.76801872e-01, -1.02192020e+00,  5.48086524e-01,
+          -1.06414735e+00,  2.13483238e+00, -1.57217550e+00,
+          -1.59913826e+00,  9.21469331e-02,  2.90586621e-01,
+           1.25242352e+00,  8.48501027e-01, -4.89390790e-01,
+          -1.87651825e+00,  4.58634853e+00, -3.01896203e-02,
+           4.40049410e-01, -1.38701677e+00,  2.10540819e+00,
+          -7.19285086e-02, -1.64573944e+00, -8.72999966e-01,
+          -1.20975614e+00, -9.69614029e-01, -9.11131322e-01,
+          -3.60090685e+00, -1.53211105e+00, -1.31741154e+00,
+          -2.58251524e+00,  3.00816655e+00, -9.27483439e-01,
+           3.79962230e+00, -1.83109999e+00,  1.36461306e+00,
+           2.41409230e+00, -6.04169130e-01,  3.32584471e-01,
+          -5.57026327e-01,  1.89718246e+00, -2.23321781e-01,
+          -1.83137262e+00, -3.75210017e-01, -1.47676694e+00,
+          -1.12149072e+00, -1.12200737e+00, -1.84424853e+00,
+           5.95007002e-01, -2.87714750e-01,  4.34117883e-01,
+           2.33170629e+00, -4.64823455e-01, -1.99762833e+00,
+           1.62681103e-01,  1.18357405e-01,  2.03577566e+00,
+           6.24363363e-01,  8.53598237e-01, -8.35693896e-01,
+          -5.13031662e-01,  2.77205408e-01,  1.83061838e+00,
+          -8.47038567e-01, -4.34809715e-01, -1.19517231e+00,
+          -4.18310642e+00, -9.57898498e-01,  9.28487241e-01,
+          -1.80793118e+00, -9.65931237e-01,  2.87468243e+00,
+          -1.16332936e+00,  2.66086388e+00, -9.91169870e-01,
+          -1.14292605e-04, -7.59032369e-01,  2.67058945e+00,
+          -1.70028317e+00, -1.71672142e+00,  1.31071973e+00,
+          -5.47025800e-01, -1.80086172e+00, -3.06567740e+00,
+           1.43438375e+00, -1.75229275e+00,  1.55246198e+00,
+           6.67049438e-02, -2.05713916e+00,  8.89191210e-01,
+           1.99744081e+00, -2.57218814e+00,  1.63740659e+00,
+          -1.15092158e+00, -1.50472689e+00, -2.58549452e-01,
+           8.31618235e-02,  2.21821442e-01,  1.52790475e+00,
+          -8.20901215e-01,  2.83850360e+00,  7.81516433e-01,
+           1.24366248e+00, -7.19230056e-01, -1.61684847e+00,
+           4.67291117e-01, -1.45504892e+00, -5.56011975e-01,
+           2.60807586e+00,  7.69157052e-01, -2.00595188e+00,
+          -9.88338292e-01, -1.59842741e+00,  3.08167517e-01,
+          -1.37422299e+00,  1.04636872e+00,  1.28386676e+00,
+          -3.27715063e+00, -4.62127179e-01,  6.23015046e-01,
+           6.75244391e-01, -4.54250365e-01, -5.32015979e-01,
+          -1.67019188e+00,  9.32368100e-01,  3.75352335e+00,
+           3.85581881e-01,  2.97433734e-01, -1.80228674e+00,
+          -8.64145219e-01,  2.76598513e-01,  2.78251338e+00,
+           8.62675369e-01,  1.47388065e+00,  9.08102632e-01,
+          -1.19731081e+00, -7.61352479e-03,  1.52711987e+00,
+          -3.01754189e+00,  2.57122135e+00, -9.29303527e-01,
+           1.92665589e+00, -1.53819621e-01, -8.47813487e-01,
+           2.61660576e-01,  7.37300968e+00, -1.26560783e+00,
+          -2.86795259e+00,  9.60796535e-01, -5.92000067e-01,
+          -2.01849866e+00,  1.00115216e+00, -3.16433251e-01,
+           1.37233078e+00, -1.83985996e+00, -1.23733294e+00,
+          -2.20516515e+00, -2.28865337e+00,  1.45275378e+00,
+           3.18723917e+00, -8.51166666e-01, -2.56244564e+00,
+          -1.18744230e+00,  2.84385133e+00,  1.00506842e+00,
+          -1.14762115e+00,  2.06148934e+00, -1.83489013e+00,
+           1.19290316e+00, -9.82065201e-01, -6.41253114e-01,
+           1.55659866e+00,  5.07988453e-01, -5.55119038e-01,
+          -3.93150121e-01, -1.94538820e+00,  3.55876422e+00,
+           2.88890576e+00,  1.87459484e-01, -1.14152563e+00,
+           5.52047908e-01,  1.86747134e+00, -2.11299341e-02,
+           5.55276692e-01,  6.77169561e-01,  1.21094763e+00,
+          -1.86387733e-01, -4.01604176e-01, -1.01740313e+00,
+          -9.03903604e-01,  1.16394377e+00,  1.37742436e+00,
+           1.02703094e+01, -5.30500770e-01,  8.60396385e-01,
+          -1.05291951e+00, -1.19237852e+00,  3.04228030e-02,
+           5.44942439e-01, -1.19146919e+00, -2.04713202e+00,
+          -2.18285695e-02, -3.48949581e-01, -6.51343107e-01,
+          -3.79497975e-01,  1.76755771e-01, -5.47035992e-01,
+          -2.02744827e-02,  1.18533540e+00,  9.02472258e-01,
+           1.96188301e-01, -3.54566741e+00, -1.86088413e-01,
+          -5.53117335e-01, -2.11047435e+00, -6.48679495e-01,
+           2.93640661e+00, -1.25942576e+00, -2.62595892e+00,
+           1.09040475e+00,  1.51123798e+00, -7.17100561e-01,
+           2.37827182e+00, -1.41148996e+00, -4.80820417e-01,
+           1.20436502e+00, -1.48536146e+00, -2.01915193e+00,
+          -1.28752816e+00, -8.93070638e-01,  2.04212260e+00,
+          -9.37148750e-01,  3.17253613e+00, -3.51777673e+00,
+          -3.02665615e+00, -2.59815598e+00, -1.66315627e+00,
+          -4.31985885e-01,  2.85572457e+00,  3.45135868e-01,
+          -7.30280876e-01, -1.38595486e+00,  2.23813224e+00,
+           2.98977661e+00,  6.98324740e-01, -4.85550791e-01,
+          -9.50458050e-01,  1.93977749e+00, -1.66045284e+00,
+          -1.98545587e+00,  5.31625330e-01, -4.24058765e-01,
+          -7.70750999e-01, -9.49996233e-01, -2.61147547e+00,
+           2.72834599e-01,  1.46971667e+00, -1.63237727e+00,
+           6.24799669e-01,  2.68125355e-01,  5.62164664e-01,
+          -1.48421264e+00, -2.75519562e+00,  6.34362698e-01,
+          -2.37075701e-01, -2.39209104e+00, -1.84159493e+00,
+          -2.27198792e+00, -6.53973281e-01,  4.48285675e+00,
+           8.51422846e-02,  1.81302071e+00, -1.44360578e+00,
+          -2.58702207e+00,  1.67986393e-01, -3.35996300e-01,
+          -7.92185366e-01,  2.19921732e+00,  4.34449583e-01,
+           1.87266394e-01, -1.23330832e-01, -1.27266836e+00,
+          -9.28889751e-01,  5.67593217e-01, -4.93463606e-01,
+          -1.10878956e+00, -1.50960922e+00, -1.78624213e+00,
+           1.61611542e-01,  1.84638157e-01,  9.40679491e-01,
+           1.97258341e+00, -2.70565605e+00, -4.60374236e-01,
+          -4.62599665e-01,  6.63806975e-01, -1.97992837e+00,
+          -4.37411547e-01,  1.82308781e+00,  5.47553062e-01,
+           9.60279703e-01,  1.23812985e+00, -1.16290045e+00,
+          -2.46622682e+00, -1.60926569e+00, -2.27142525e+00,
+           1.83590472e+00, -1.32654083e+00,  8.28159034e-01,
+          -1.20199315e-01, -1.31579173e+00,  2.65862179e+00,
+           1.79536734e-02, -1.79566395e+00, -3.02686930e-01,
+           9.19712365e-01, -4.98286635e-01,  5.01004791e+00,
+           1.62641990e+00, -1.10325515e+00,  1.47700384e-01,
+          -1.14740443e+00, -1.24806371e-02, -9.75876033e-01,
+           1.73987937e+00, -2.36873364e+00, -1.69399297e+00,
+           3.15961051e+00, -2.31508636e+00, -1.41893595e-01,
+          -3.03068221e-01, -2.78794312e+00, -9.46572363e-01,
+          -4.90025616e+00, -2.76931715e+00, -2.07976294e+00,
+          -2.85732102e+00, -3.94646215e+00,  1.46986854e+00,
+           2.19869328e+00]]]], dtype=float32)]
+result[0].shape: (1, 1, 1, 1000)
+result.shape: (1, 1000)
+	 -----np.argmax(result): [207]
+	tensorflow OK
+paddings:
+ [0 0 3 3 0 0 3 3]
+node.input[1]: resnet_v1_50/Pad/paddings:0
+type: conv_op
+VALID
+type: pool_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: pool_op
+wrong place
+type: conv_op
+paddings:
+ [0 0 1 1 0 0 1 1]
+node.input[1]: resnet_v1_50/block1/unit_3/bottleneck_v1/Pad/paddings:0
+type: conv_op
+VALID
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: pool_op
+wrong place
+type: conv_op
+paddings:
+ [0 0 1 1 0 0 1 1]
+node.input[1]: resnet_v1_50/block2/unit_4/bottleneck_v1/Pad/paddings:0
+type: conv_op
+VALID
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: pool_op
+wrong place
+type: conv_op
+paddings:
+ [0 0 1 1 0 0 1 1]
+node.input[1]: resnet_v1_50/block3/unit_6/bottleneck_v1/Pad/paddings:0
+type: conv_op
+VALID
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+type: conv_op
+	to_onnx OK
+	created resnet_v1_50/resnet_v1_50.onnx
+run_caffe2()
+Current blobs in the workspace: ['input:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block1/unit_1/bottleneck
+_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/B
+atchNorm/moving_variance:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0',
+'resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50
+/block1/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0', 'resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/weights:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/weights:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/weights:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0', 'resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/weights:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/weights:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/weights:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0', 'resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/weights:0', 'resnet_v1_50/conv1/BatchNorm/beta:0', 'resnet_v1_50/conv1/BatchNorm/gamma:0', 'resnet_v1_50/conv1/BatchNorm/moving_mean:0', 'resnet_v1_50/conv1/BatchNorm/moving_variance:0', 'resnet_v1_50/conv1/weights:0', 'resnet_v1_50/logits/biases:0', 'resnet_v1_50/logits/weights:0']
+	run_onnx FAIL [enforce fail at conv_op_impl.h:30] C == filter.dim32(1) * group_. Convolution op: input channels does not match: # of input channels 9 is not equal to kernel channels * group:3*1 Error from operator: 
+input: "resnet_v1_50/conv1/Conv2D__2:0" input: "resnet_v1_50/conv1/weights:0" output: "resnet_v1_50/conv1/Conv2D:0" name: "resnet_v1_50/conv1/Conv2D" type: "Conv" arg { name: "kernels" ints: 7 ints: 7 } arg { name: "dilations" ints: 1 ints: 1 } arg { name: "strides" ints: 2 ints: 2 } device_option { device_type: 0 cuda_gpu_id: 0 }
+=== RESULT: 1 failed of 1, backend=caffe2
