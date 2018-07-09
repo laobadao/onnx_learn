@@ -200,14 +200,13 @@ class Test(object):
 
     def run_caffe2(self, name, onnx_graph, inputs):
         """Run test again caffe2 backend."""
-        print("run_caffe2()---------------------------------------------")
+        print("run_caffe2()")
         import caffe2.python.onnx.backend
         model_proto = onnx_graph.make_model("test", inputs.keys(), self.output_names)
 
         prepared_backend = caffe2.python.onnx.backend.prepare(model_proto)
 
         results = prepared_backend.run(inputs)
-        print("results:",results)
 
         print("result[0].shape:",results[0].shape)
         index = np.argmax(results[0], axis=1)
