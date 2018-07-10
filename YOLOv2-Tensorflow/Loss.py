@@ -10,15 +10,16 @@
 import numpy as np
 import tensorflow as tf
 
-def compute_loss(predictions,targets,anchors,scales,num_classes=20,output_size=(13,13)):
-    W,H = output_size
+
+def compute_loss(predictions, targets, anchors, scales, num_classes=20, output_size=(13, 13)):
+    W, H = output_size
     C = num_classes
     B = len(anchors)
-    anchors = tf.constant(anchors,dtype=tf.float32)
-    anchors = tf.reshape(anchors,[1,1,B,2]) # 存放输入的anchors的wh
+    anchors = tf.constant(anchors, dtype=tf.float32)
+    anchors = tf.reshape(anchors, [1, 1, B, 2])  # 存放输入的anchors的wh
 
     # 【1】ground truth：期望值、真实值
-    sprob,sconf,snoob,scoor = scales # loss不同部分的前面系数
+    sprob, sconf, snoob, scoor = scales  # loss不同部分的前面系数
     _coords = targets["coords"]  # ground truth [-1, H*W, B, 4]，真实坐标xywh
     _probs = targets["probs"]  # class probability [-1, H*W, B, C] ，类别概率——one hot形式，C维
     _confs = targets["confs"]  # 1 for object, 0 for background, [-1, H*W, B]，置信度，每个边界框一个
@@ -31,26 +32,26 @@ def compute_loss(predictions,targets,anchors,scales,num_classes=20,output_size=(
     truths = tf.concat([_coords, tf.expand_dims(_confs, -1), _probs], 3)
 
     # 【2】decode the net prediction：预测值、网络输出值
-    predictions = tf.reshape(predictions,[-1,H,W,B,(5+C)])
+    predictions = tf.reshape(predictions, [-1, H, W, B, (5 + C)])
     # t_x, t_y, t_w, t_h
-    coords = tf.reshape(predictions[:,:,:,:,0:4],[-1,H*W,B,4])
-    coords_xy = tf.nn.sigmoid(coords[:,:,:,0:2]) # 0-1，xy是相对于cell左上角的偏移量
-    coords_wh = tf.sqrt(tf.exp(coords[:,:,:,2:4])*anchors/np.reshape([W,H],[1,1,1,2])) # 0-1，除以特征图的尺寸13，解码成相对于整张图片的wh
-    coords = tf.concat([coords_xy,coords_wh],axis=3) # [batch_size, H*W, B, 4]
+    coords = tf.reshape(predictions[:, :, :, :, 0:4], [-1, H * W, B, 4])
+    coords_xy = tf.nn.sigmoid(coords[:, :, :, 0:2])  # 0-1，xy是相对于cell左上角的偏移量
+    coords_wh = tf.sqrt(
+        tf.exp(coords[:, :, :, 2:4]) * anchors / np.reshape([W, H], [1, 1, 1, 2]))  # 0-1，除以特征图的尺寸13，解码成相对于整张图片的wh
+    coords = tf.concat([coords_xy, coords_wh], axis=3)  # [batch_size, H*W, B, 4]
     # 置信度
-    confs = tf.nn.sigmoid(predictions[:,:,:,:,4])
-    confs = tf.reshape(confs,[-1,H*W,B,1]) # 每个边界框一个置信度，每个cell有B个边界框
+    confs = tf.nn.sigmoid(predictions[:, :, :, :, 4])
+    confs = tf.reshape(confs, [-1, H * W, B, 1])  # 每个边界框一个置信度，每个cell有B个边界框
     # 类别概率
-    probs = tf.nn.softmax(predictions[:,:,:,:,5:]) # 网络最后输出是"得分"，通过softmax变成概率
-    probs = tf.reshape(probs,[-1,H*W,B,C])
+    probs = tf.nn.softmax(predictions[:, :, :, :, 5:])  # 网络最后输出是"得分"，通过softmax变成概率
+    probs = tf.reshape(probs, [-1, H * W, B, C])
     # prediction汇总
-    preds = tf.concat([coords,confs,probs],axis=3) # [-1, H*W, B, (4+1+C)]
+    preds = tf.concat([coords, confs, probs], axis=3)  # [-1, H*W, B, (4+1+C)]
     # prediction计算IOU-->up_left, down_right
     wh = tf.pow(coords[:, :, :, 2:4], 2) * np.reshape([W, H], [1, 1, 1, 2])
     areas = wh[:, :, :, 0] * wh[:, :, :, 1]
     centers = coords[:, :, :, 0:2]
     up_left, down_right = centers - (wh * 0.5), centers + (wh * 0.5)
-
 
     # ※※※【3】计算ground truth和anchor的IOU：※※※
     # 计算IOU只考虑形状，先将anchor与ground truth的中心点都偏移到同一位置（cell左上角），然后计算出对应的IOU值。

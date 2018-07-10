@@ -23,11 +23,16 @@ import caffe2.python.onnx.backend
 from caffe2.python import core, workspace
 from caffe2.proto import caffe2_pb2
 
+import cv2
+from decode import decode
+from utils import preprocess_image, postprocess, draw_detection
+from config import anchors, class_names
+
 
 TMPPATH = tempfile.mkdtemp()
 PERFITER = 1000
 
-
+IMAGE_SHAPE = (0, 0)
 
 def get_beach(inputs):
     """Get beach image as input."""
@@ -47,6 +52,27 @@ def get_beach(inputs):
 
     #print("img_np:",img_np)
     #img_np = img_np /255
+    return {name: img_np}
+
+def get_detection(inputs):
+    """Get detection image as input."""
+    global IMAGE_SHAPE
+    print("get_detection img......")
+    for name, shape in inputs.items():
+        print("name:", name, "shape:", shape)
+        break
+    resize_to = shape[1:3]
+    print("resize_to:", resize_to)
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "detection_3.jpg")
+    
+    image = cv2.imread(path)
+    IMAGE_SHAPE = image.shape[:2]  # 只取wh，channel=3不取
+
+    img = PIL.Image.open(path)
+    img = img.resize(resize_to, PIL.Image.ANTIALIAS)
+    img_np = np.array(img).astype(np.float32)
+    img_np = img_np.reshape(shape)
+    img_np = img_np /255
     return {name: img_np}
 
 
@@ -79,7 +105,8 @@ _INPUT_FUNC_MAPPING = {
     "get_beach": get_beach,
     "get_random": get_random,
     "get_random256": get_random256,
-    "get_ramp": get_ramp
+    "get_ramp": get_ramp,
+    "get_detection": get_detection
 }
 
 
@@ -172,25 +199,39 @@ class Test(object):
             k = sess.graph.get_tensor_by_name(k)
             feed_dict[k] = v
         result = sess.run(self.output_names, feed_dict=feed_dict)
-        print("result:",result)
-        print("result[0].shape:",result[0].shape)
-     
-        index = np.argmax(result[0], axis=1)
-        #print("index:", index)
+
+        if result[0].shape == (1, 1001):
+            print("result:",result)
+            print("result[0].shape:",result[0].shape)     
+            index = np.argmax(result[0], axis=1)
+            print("index:", index)
         # resnet v1 50 的版本需要 这样去检测 index 它的 shape 维数比较多 1000 类
 
         if result[0].shape == (1, 1, 1, 1001) or result[0].shape == (1, 1, 1, 1000):
             print("result.shape:",result[0][0][0].shape)
             index = np.argmax(result[0][0][0], axis=1)
             print("\t result[0][0][0][index]:", result[0][0][0][0][index])
+            print("\t index:", index)
 
-        print("\t -----np.argmax(result):", index)
+        # 检测网络 yolov2
+        if result[0].shape == (1, 169, 5, 4):
+            print("bboxes--result[0].shape:",result[0].shape)
+            print("obj--result[1].shape:",result[1].shape)
+            print("classes--result[2].shape:",result[2].shape)
+            bboxes, scores, class_max_index = postprocess(result[0], result[1], result[2], image_shape=IMAGE_SHAPE)
+            print("\n postprocess done")
+            print("bboxes:", bboxes)
+            print("scores:", scores)
+            print("class_max_index:", class_max_index)
+
+        
         if self.perf:
             start = time.time()
             for _ in range(PERFITER):
                 _ = sess.run(self.output_names, feed_dict=feed_dict)
             self.tf_runtime = time.time() - start
         return result
+       
 
     @staticmethod
     def to_onnx(tf_graph, opset=None):
@@ -332,6 +373,7 @@ class Test(object):
                     inputs[k] = v.astype(dtype)
 
             tf_results = self.run_tensorflow(sess, inputs)
+
             onnx_graph = None
             print("\ttensorflow", "OK")
             try:

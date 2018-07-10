@@ -9,8 +9,7 @@
 
 import os
 import tensorflow as tf
-import numpy as np
-from tensorflow.python.tools import freeze_graph
+
 from tensorflow.python.framework import graph_util
 import os.path
 import argparse
