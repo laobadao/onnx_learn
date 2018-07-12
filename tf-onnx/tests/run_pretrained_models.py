@@ -284,7 +284,7 @@ class Test(object):
             print("caffe2 obj--result[1].shape:",result[1].shape)
             print("caffe2 classes--result[2].shape:",result[2].shape)
             print("len(result):", len(result))
-            bboxes, scores, class_max_index = postprocess(result[0].shape, result[1], result[2], image_shape=IMAGE_SHAPE)
+            bboxes, scores, class_max_index = postprocess(result[0], result[1], result[2], image_shape=IMAGE_SHAPE)
             print("\n caffe2 postprocess done")
             print("caffe2 bboxes:", bboxes)
             print("caffe2 scores:", scores)
