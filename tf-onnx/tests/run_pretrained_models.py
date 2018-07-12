@@ -37,8 +37,6 @@ PERFITER = 1000
 
 IMAGE_SHAPE = (0, 0)
 
-RESULT_0 = None
-
 def get_beach(inputs):
     """Get beach image as input."""
     for name, shape in inputs.items():
@@ -199,9 +197,35 @@ class Test(object):
                 zip_ref.close()
         return fpath, dir_name
 
+    def show_result(self, result, name):
+
+        if result[0].shape == (1, 1001):
+            print(name, " result:",result)
+            print(name, " result[0].shape:",result[0].shape)     
+            index = np.argmax(result[0], axis=1)
+            print(name, " index:", index)
+        # resnet v1 50 的版本需要 这样去检测 index 它的 shape 维数比较多 1000 类
+
+        if result[0].shape == (1, 1, 1, 1001) or result[0].shape == (1, 1, 1, 1000):
+            print(name, " result.shape:",result[0][0][0].shape)
+            index = np.argmax(result[0][0][0], axis=1)
+            print(name, "\t result[0][0][0][index]:", result[0][0][0][0][index])
+            print(name, "\t index:", index)
+
+        # 检测网络 yolov2
+        if result[0].shape == (1, 169, 5, 4):
+            print(name, " bboxes--result[0].shape:",result[0].shape)
+            print(name, " obj--result[1].shape:",result[1].shape)
+            print(name, " classes--result[2].shape:",result[2].shape)
+            print("len(result):", len(result))
+            bboxes, scores, class_max_index = postprocess(result[0], result[1], result[2], image_shape=IMAGE_SHAPE)
+            print(name, "\n  postprocess done")
+            print(name, " bboxes:", bboxes)
+            print(name, " scores:", scores)
+            print(name, " class_max_index:", class_max_index)    
+
 
     def run_tensorflow(self, sess, inputs):
-        global RESULT_0
         print('run_tensorflow(): so we have a reference output')
         """Run model on tensorflow so we have a referecne output."""
         feed_dict = {}
@@ -209,32 +233,8 @@ class Test(object):
             k = sess.graph.get_tensor_by_name(k)
             feed_dict[k] = v
         result = sess.run(self.output_names, feed_dict=feed_dict)
-
-        if result[0].shape == (1, 1001):
-            print("result:",result)
-            print("result[0].shape:",result[0].shape)     
-            index = np.argmax(result[0], axis=1)
-            print("index:", index)
-        # resnet v1 50 的版本需要 这样去检测 index 它的 shape 维数比较多 1000 类
-
-        if result[0].shape == (1, 1, 1, 1001) or result[0].shape == (1, 1, 1, 1000):
-            print("result.shape:",result[0][0][0].shape)
-            index = np.argmax(result[0][0][0], axis=1)
-            print("\t result[0][0][0][index]:", result[0][0][0][0][index])
-            print("\t index:", index)
-
-        # 检测网络 yolov2
-        if result[0].shape == (1, 169, 5, 4):
-            print("bboxes--result[0].shape:",result[0].shape)
-            print("obj--result[1].shape:",result[1].shape)
-            print("classes--result[2].shape:",result[2].shape)
-            RESULT_0 = result[0]
-            bboxes, scores, class_max_index = postprocess(result[0], result[1], result[2], image_shape=IMAGE_SHAPE)
-            print("\n postprocess done")
-            print("bboxes:", bboxes)
-            print("scores:", scores)
-            print("class_max_index:", class_max_index)
-
+        
+        self.show_result(result, "tensorflow")
         
         if self.perf:
             start = time.time()
@@ -251,45 +251,16 @@ class Test(object):
 
 
     def run_caffe2(self, name, onnx_graph, inputs):
-        global RESULT_0
         """Run test again caffe2 backend."""
         print("run_caffe2()---------------------------------------------")
         import caffe2.python.onnx.backend
         model_proto = onnx_graph.make_model("test", inputs.keys(), self.output_names)
-
         prepared_backend = caffe2.python.onnx.backend.prepare(model_proto)
-
         result = prepared_backend.run(inputs)
-
-        #print("caffe2 result:", result)
 
         print("caffe2 result[0].shape :", result[0].shape)
 
-        if result[0].shape == (1, 1001):
-            print("caffe2 result:",result)
-            print("caffe2 result[0].shape:",result[0].shape)     
-            index = np.argmax(result[0], axis=1)
-            print("caffe2 index:", index)
-        # resnet v1 50 的版本需要 这样去检测 index 它的 shape 维数比较多 1000 类
-
-        if result[0].shape == (1, 1, 1, 1001) or result[0].shape == (1, 1, 1, 1000):
-            print("caffe2 result.shape:",result[0][0][0].shape)
-            index = np.argmax(result[0][0][0], axis=1)
-            print("\t caffe2 result[0][0][0][index]:", result[0][0][0][0][index])
-            print("\t caffe2 index:", index)
-
-        # 检测网络 yolov2
-        if result[0].shape == (1, 169, 5, 4):
-            print("caffe2 bboxes--result[0].shape:",result[0].shape)
-            print("caffe2 obj--result[1].shape:",result[1].shape)
-            print("caffe2 classes--result[2].shape:",result[2].shape)
-            print("len(result):", len(result))
-            bboxes, scores, class_max_index = postprocess(result[0], result[1], result[2], image_shape=IMAGE_SHAPE)
-            print("\n caffe2 postprocess done")
-            print("caffe2 bboxes:", bboxes)
-            print("caffe2 scores:", scores)
-            print("caffe2 class_max_index:", class_max_index)
-
+        self.show_result(result, "caffe2")
 
         if self.perf:
             start = time.time()
