@@ -1,13 +1,16 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import argparse
 import os
 import tarfile
 import time
 import tempfile
-import urllib
-import urllib.request
+import requests
 import zipfile
 
 import PIL.Image
@@ -33,6 +36,8 @@ TMPPATH = tempfile.mkdtemp()
 PERFITER = 1000
 
 IMAGE_SHAPE = (0, 0)
+
+RESULT_0 = None
 
 def get_beach(inputs):
     """Get beach image as input."""
@@ -177,7 +182,11 @@ class Test(object):
         os.makedirs(dir_name, exist_ok=True)
         fpath = os.path.join(dir_name, fname)
         if not os.path.exists(fpath):
-            urllib.request.urlretrieve(url, fpath)
+            response = requests.get(url)
+            if response.status_code not in [200]:
+                response.raise_for_status()
+            with open(fpath, "wb") as f:
+                f.write(response.content)
         model_path = os.path.join(dir_name, self.local)
         if not os.path.exists(model_path):
             if ftype == 'tgz':
@@ -192,6 +201,7 @@ class Test(object):
 
 
     def run_tensorflow(self, sess, inputs):
+        global RESULT_0
         print('run_tensorflow(): so we have a reference output')
         """Run model on tensorflow so we have a referecne output."""
         feed_dict = {}
@@ -218,6 +228,7 @@ class Test(object):
             print("bboxes--result[0].shape:",result[0].shape)
             print("obj--result[1].shape:",result[1].shape)
             print("classes--result[2].shape:",result[2].shape)
+            RESULT_0 = result[0]
             bboxes, scores, class_max_index = postprocess(result[0], result[1], result[2], image_shape=IMAGE_SHAPE)
             print("\n postprocess done")
             print("bboxes:", bboxes)
@@ -240,6 +251,7 @@ class Test(object):
 
 
     def run_caffe2(self, name, onnx_graph, inputs):
+        global RESULT_0
         """Run test again caffe2 backend."""
         print("run_caffe2()---------------------------------------------")
         import caffe2.python.onnx.backend
@@ -247,18 +259,37 @@ class Test(object):
 
         prepared_backend = caffe2.python.onnx.backend.prepare(model_proto)
 
-        results = prepared_backend.run(inputs)
-        print("results:",results)
+        result = prepared_backend.run(inputs)
 
-        print("result[0].shape:",results[0].shape)
-        index = np.argmax(results[0], axis=1)
+        #print("caffe2 result:", result)
 
-        if results[0].shape == (1, 1, 1, 1001) or results[0].shape == (1, 1, 1, 1000):
-            print("result.shape:",results[0][0][0].shape)
-            index = np.argmax(results[0][0][0], axis=1)
-            print("\t result[0][0][0][index]:", results[0][0][0][0][index])
+        print("caffe2 result[0].shape :", result[0].shape)
 
-        print("\t -----np.argmax(results):", index)
+        if result[0].shape == (1, 1001):
+            print("caffe2 result:",result)
+            print("caffe2 result[0].shape:",result[0].shape)     
+            index = np.argmax(result[0], axis=1)
+            print("caffe2 index:", index)
+        # resnet v1 50 的版本需要 这样去检测 index 它的 shape 维数比较多 1000 类
+
+        if result[0].shape == (1, 1, 1, 1001) or result[0].shape == (1, 1, 1, 1000):
+            print("caffe2 result.shape:",result[0][0][0].shape)
+            index = np.argmax(result[0][0][0], axis=1)
+            print("\t caffe2 result[0][0][0][index]:", result[0][0][0][0][index])
+            print("\t caffe2 index:", index)
+
+        # 检测网络 yolov2
+        if result[0].shape == (1, 169, 5, 4):
+            print("caffe2 bboxes--result[0].shape:",result[0].shape)
+            print("caffe2 obj--result[1].shape:",result[1].shape)
+            print("caffe2 classes--result[2].shape:",result[2].shape)
+            print("len(result):", len(result))
+            bboxes, scores, class_max_index = postprocess(result[0].shape, result[1], result[2], image_shape=IMAGE_SHAPE)
+            print("\n caffe2 postprocess done")
+            print("caffe2 bboxes:", bboxes)
+            print("caffe2 scores:", scores)
+            print("caffe2 class_max_index:", class_max_index)
+
 
         if self.perf:
             start = time.time()
@@ -266,7 +297,7 @@ class Test(object):
                 _ = prepared_backend.run(inputs)
             self.onnx_runtime = time.time() - start
             print("self.onnx_runtime:",self.onnx_runtime)
-        return results
+        return result
 
 
     def run_onnxmsrt(self, name, onnx_graph, inputs):

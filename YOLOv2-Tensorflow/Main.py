@@ -24,10 +24,10 @@ MODEL_NAME = "frozen_yolov2.pb"
 
 def main():
     input_size = (416, 416)
-    image_file = 'E:\\Intenginetech\\onnx_model\\YOLOv2-Tensorflow\\yolo2_data\\car_2.jpg'
+    image_file = 'E:\\Intenginetech\\onnx_model\\YOLOv2-Tensorflow\\yolo2_data\\detection_3.jpg'
     image = cv2.imread(image_file)
     image_shape = image.shape[:2]  # 只取wh，channel=3不取
-
+    print("image_shape:", image_shape)
     # copy、resize416*416、归一化、在第 0 维增加存放 batchsize 维度
     image_cp = preprocess_image(image, input_size)
 
@@ -44,15 +44,15 @@ def main():
         saver.restore(sess, model_path)
         bboxes, obj_probs, class_probs = sess.run(output_decoded, feed_dict={tf_image: image_cp})
 
-    # # 【2】筛选解码后的回归边界框——NMS(post process后期处理)
-    # bboxes, scores, class_max_index = postprocess(bboxes, obj_probs, class_probs, image_shape=image_shape)
-    #
-    # # 【3】绘制筛选后的边界框
-    # img_detection = draw_detection(image, bboxes, scores, class_max_index, class_names)
-    # cv2.imwrite(".\\yolo2_data\\detection2.jpg", img_detection)
-    # print('YOLO_v2 detection has done!')
-    # cv2.imshow("detection_results", img_detection)
-    # cv2.waitKey(0)
+    # 【2】筛选解码后的回归边界框——NMS(post process后期处理)
+    bboxes, scores, class_max_index = postprocess(bboxes, obj_probs, class_probs, image_shape=image_shape)
+
+    # 【3】绘制筛选后的边界框
+    img_detection = draw_detection(image, bboxes, scores, class_max_index, class_names)
+    cv2.imwrite(".\\yolo2_data\\detection2.jpg", img_detection)
+    print('YOLO_v2 detection has done!')
+    cv2.imshow("detection_results", img_detection)
+    cv2.waitKey(0)
 
 
 def freeze_graph(model_folder):
@@ -63,7 +63,7 @@ def freeze_graph(model_folder):
 
 
     input_size = (416, 416)
-    image_file = 'E:\\Intenginetech\\onnx_model\\YOLOv2-Tensorflow\\yolo2_data\\car_2.jpg'
+    image_file = 'E:\\Intenginetech\\onnx_model\\YOLOv2-Tensorflow\\yolo2_data\\detection_3.jpg'
     image = cv2.imread(image_file)
     image_shape = image.shape[:2]  # 只取wh，channel=3不取
 
@@ -103,12 +103,14 @@ def freeze_graph(model_folder):
         #     print(op.name, op.values())
 
 
+# if __name__ == '__main__':
+#
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("model_folder", type=str, help="input ckpt model dir")  # 命令行解析，help是提示符，type是输入的类型，
+#     # 这里运行程序时需要带上模型ckpt的路径，不然会报 error: too few arguments
+#     aggs = parser.parse_args()
+#     freeze_graph(aggs.model_folder)
+##python -m Main checkpoint_dir
+#
 if __name__ == '__main__':
-    # main()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("model_folder", type=str, help="input ckpt model dir")  # 命令行解析，help是提示符，type是输入的类型，
-    # 这里运行程序时需要带上模型ckpt的路径，不然会报 error: too few arguments
-    aggs = parser.parse_args()
-    freeze_graph(aggs.model_folder)
-# python -m Main checkpoint_dir
+    main()

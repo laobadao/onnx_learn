@@ -4,6 +4,10 @@
 """
 tf2onnx.tf2onnx - rewrite tensorflow graph to onnx graph
 """
+
+from __future__ import division
+from __future__ import print_function
+
 import collections
 import logging
 import sys
@@ -87,7 +91,7 @@ def tensorflow_to_onnx(graph):
                 onnx_tensor = utils.tf_to_onnx_tensor(node.get_attr(a), name=node.name + ":0")
                 attr[a] = onnx_tensor
             elif a == "DstT":
-                attr["to"] =  utils.map_tf_dtype(node.get_attr("DstT"))
+                attr["to"] = utils.map_tf_dtype(node.get_attr("DstT"))
             elif a == "SrcT":
                 continue
             elif a in ignored_attr:
@@ -126,6 +130,7 @@ def _convert_shapenode_to_int64(ctx, node, input_number):
         return [cast_op, node]
 
 # pylint: disable=W0613,C0111,W0612
+
 
 def no_op(ctx, node, name, args):
     """Skip node."""
@@ -177,8 +182,11 @@ def broadcast_op(ctx, node, name, args):
 
 def broadcast_op7(ctx, node, name, args):
     """Elementwise Ops with broadcast flag."""
+    #print("\n broadcast_op7")
     shape0 = ctx.get_shape(node.input[0])
+    #print("shape0:", shape0)
     shape1 = ctx.get_shape(node.input[1])
+    #print("shape1:", shape1)
     if shape0 != shape1:
         # this is more shortcoming in the broadcasting code
         # of caffe2 and winml/rs4 but since those are the primary
@@ -193,6 +201,14 @@ def broadcast_op7(ctx, node, name, args):
             tmp = node.input[0]
             node.input[0] = node.input[1]
             node.input[1] = tmp
+        if shape0 and shape1 and len(shape0) == len(shape1) and node.type in ["Mul", "Add"]:
+            if shape0[len(shape0)-1] < shape1[len(shape1)-1]:
+                tmp = node.input[0]
+                node.input[0] = node.input[1]
+                node.input[1] = tmp
+                   
+    # print("shape0 after:", ctx.get_shape(node.input[0]))
+    # print("shape1 after:", ctx.get_shape(node.input[1]))                
     return node
 
 
@@ -259,44 +275,7 @@ def squeeze_op(ctx, node, name, args):
     return node
 
 
-def reshape_op(ctx, node, name, args):
-    # T output = Reshape(T tensor, Tshape shape, @type Tshape)
-    # T reshaped = Reshape(T data, @INTS shape) - but takes a optional 2nd input for shape
-    shape_node = node.inputs[1]
-    shape = shape_node.get_tensor_value()
-    if shape is None:
-        log.error("Reshape on node %s does not have a const shape", node.name)
-        return None
-    ctx.remove_input(node, node.input[1])
-    node.set_attr("shape", shape)
-    ctx.set_shape(node.output[0], shape)
-    return node
 
-
-def reshape_op5(ctx, node, name, args):
-    need_casting = node.dtype in [onnx_pb.TensorProto.INT32,
-                                  onnx_pb.TensorProto.INT16,
-                                  onnx_pb.TensorProto.INT64]
-    # onnx wants reshape.input[1] to have the value be int64 which is not the case for tensorflow.
-    nodes = _convert_shapenode_to_int64(ctx, node, 1)
-    if not need_casting:
-        # onnx reshape can handle the type - done
-        return nodes
-
-    # onnx < opset 8 does not know reshape for other types than float*, wrap the reshape in casts
-    input_cast = ctx.insert_new_node_on_input(node, "Cast", node.input[0])
-    input_cast.set_attr("to", onnx_pb.TensorProto.FLOAT)
-    ctx.copy_shape(name, input_cast.output[0])
-
-    # if the next node is already a cast we don't need to insert another one
-    next_nodes = ctx.find_output_consumers(node.output[0])
-    if len(next_nodes) != 1 or next_nodes[0].type != "Cast":
-        op_name = utils.make_name(node.name)
-        output_cast = ctx.insert_new_node_on_output("Cast", node.output[0], name=op_name)
-        output_cast.set_attr("to", node.dtype)
-        ctx.copy_shape(name, output_cast.output[0])
-        nodes.append(output_cast)
-    return [input_cast] + nodes
 
 
 NCHW_TO_NHWC = [0, 2, 3, 1]
@@ -304,11 +283,13 @@ NHWC_TO_NCHW = [0, 3, 1, 2]
 HWCN_TO_NCHW = [3, 2, 0, 1]
 NCHW_TO_HWCN = [2, 3, 1, 0]
 
+
 def spatial_map(shape, perm):
     new_shape = shape[:]
     for i in perm:
         new_shape[i] = shape[perm[i]]
     return new_shape
+
 
 def conv_convert_inputs(ctx, node, with_kernel=False, new_kernel_shape=None,
                         input_indices=None, output_indices=None):
@@ -583,6 +564,7 @@ def relu6_op(ctx, node, name, args):
     six.fill(6.0)
     six_node = ctx.make_const(six_name, "Const", six)
     node.input.append(zero_name)
+
     op_name = utils.make_name(node.name)
     new_op = ctx.insert_new_node_on_output("Min", node.output[0], name=op_name)
     new_op.input.append(six_name)
@@ -646,8 +628,6 @@ def transpose_op(ctx, node, name, args):
 def concat_op(ctx, node, name, args):
     # T output = ConcatV2(T values, Tidx axis, @int N, @type Tidx)
     # T concat_result = Concat(T inputs, @INT axis)
-    print("concat_op:",node)
-    
     axis_node = node.inputs[-1]
     axis = axis_node.get_tensor_value()
     ctx.remove_input(node, node.input[-1])
@@ -658,8 +638,6 @@ def concat_op(ctx, node, name, args):
 def slice_op(ctx, node, name, args):
     # T output = Slice(T input, Index begin, Index size, @type Index)
     # T output = Slice(T data, @INTS axes, @INTS ends, @INTS starts)
-    print("slice_op:", node)
-    print("node.inputs[1]:", node.inputs[1])
     starts = node.inputs[1].get_tensor_value()
     size = node.inputs[2].get_tensor_value()
     ends = np.add(starts, size)
@@ -811,7 +789,6 @@ def stridedslice_op(ctx, node, name, args):
         cast_op.set_attr("to", input_dtype)
         ctx.copy_shape(node.input[0], cast_op.output[0])
         nodes.append(cast_op)
-
     return nodes
 
 
@@ -894,12 +871,56 @@ def tile_op7(ctx, node, name, args):
 
 
 def spacetodepth_op(ctx, node, name, args):
-    print("spacetodepth_op:", node)
+    #print("spacetodepth_op:", node)
     block_size = node.get_attr("block_size")
     node.set_attr("blocksize", block_size.i)
     nodes = conv_convert_inputs(ctx, node, with_kernel=False)
     return nodes
 
+    #new_shape = [node_shape[0], int(node_shape[1]/block_size.i), int(node_shape[2]/block_size.i), int(node_shape[3]*block_size.i*block_size.i)]
+
+
+def reshape_op5(ctx, node, name, args):
+    
+    #print("\n reshape_op5 ")
+    need_casting = node.dtype in [onnx_pb.TensorProto.INT32,
+                                  onnx_pb.TensorProto.INT16,
+                                  onnx_pb.TensorProto.INT64]
+                           
+    # onnx wants reshape.input[1] to have the value be int64 which is not the case for tensorflow.
+    nodes = _convert_shapenode_to_int64(ctx, node, 1)
+    if not need_casting:
+        # onnx reshape can handle the type - done
+        return nodes
+
+    # onnx < opset 8 does not know reshape for other types than float*, wrap the reshape in casts
+    input_cast = ctx.insert_new_node_on_input(node, "Cast", node.input[0])
+    input_cast.set_attr("to", onnx_pb.TensorProto.FLOAT)
+    ctx.copy_shape(name, input_cast.output[0])
+
+    # if the next node is already a cast we don't need to insert another one
+    next_nodes = ctx.find_output_consumers(node.output[0])
+    if len(next_nodes) != 1 or next_nodes[0].type != "Cast":
+        op_name = utils.make_name(node.name)
+        output_cast = ctx.insert_new_node_on_output("Cast", node.output[0], name=op_name)
+        output_cast.set_attr("to", node.dtype)
+        ctx.copy_shape(name, output_cast.output[0])
+        nodes.append(output_cast)
+    return [input_cast] + nodes    
+
+
+def reshape_op(ctx, node, name, args):
+    # T output = Reshape(T tensor, Tshape shape, @type Tshape)
+    # T reshaped = Reshape(T data, @INTS shape) - but takes a optional 2nd input for shape
+    shape_node = node.inputs[1]
+    shape = shape_node.get_tensor_value()
+    if shape is None:
+        log.error("Reshape on node %s does not have a const shape", node.name)
+        return None
+    ctx.remove_input(node, node.input[1])
+    node.set_attr("shape", shape)
+    ctx.set_shape(node.output[0], shape)
+    return node
 
 def minmax_op(ctx, node, name, args):
     # tensorflow minimum/maximum support broadcast. Onnx <= opset 7 does not.
@@ -945,7 +966,7 @@ def pack_op(ctx, node, name, args):
     output_name = op_name + ":0"
     concat = Node(helper.make_node("Concat", inputs, [output_name], name=op_name, axis=axis), ctx)
     ctx.copy_shape(node.output[0], concat.output[0])
-    ctx.replace_all_inputs(ctx.get_nodes(), node.output[0], output_name)
+    ctx.replace_all_inputs(ctx.get_nodes(), node.output[0], output_name)    
     return [concat] + nodes
 
 
@@ -1003,6 +1024,7 @@ def onehot_op(ctx, node, name, args):
         return [node, transpose_op]
     return node
 
+
 def fused_batchnorm_op7(ctx, node, name, args):
     node.type = "BatchNormalization"
     # tf inputs: x, scale, bias, mean, variance
@@ -1012,14 +1034,11 @@ def fused_batchnorm_op7(ctx, node, name, args):
     # output: mean, var, savedmean, savedvar,
     is_test = node.get_attr("is_training")
     if is_test.i == 0:
-        #print("node.output:", node.output)
-        #print("len(node.output):", len(node.output))
         output_len = len(node.output)
         for i in range(output_len-1):
             del node.output[1]
     nodes = conv_convert_inputs(ctx, node, with_kernel=False)
     return nodes
-
 
 
 # pylint: enable=W0613,C0111,W0612
@@ -1153,6 +1172,7 @@ _OPSETS = [
     (6, _OPSET_6),
     (7, _OPSET_7),
 ]
+
 
 def rewrite_random_uniform(g, ops):
     pattern = \
