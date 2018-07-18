@@ -88,6 +88,9 @@ def main(argv=None):
 
         print("%d ops in the final graph." % len(output_graph_def.node))  # 得到当前图有几个操作节点
 
+    print("detected_boxes[0].shape:", detected_boxes[0].shape)
+    print("detected_boxes:", detected_boxes)
+
     filtered_boxes = non_max_suppression(detected_boxes, confidence_threshold=FLAGS.conf_threshold,
                                          iou_threshold=FLAGS.iou_threshold)
 

@@ -21,21 +21,22 @@ import yaml
 from tensorflow.core.framework import graph_pb2
 from tf2onnx.tfonnx import process_tf_graph
 from tensorflow.python.framework.graph_util import convert_variables_to_constants
-
+from PIL import Image, ImageDraw
 import caffe2.python.onnx.backend
 from caffe2.python import core, workspace
 from caffe2.proto import caffe2_pb2
 
 import cv2
 from decode import decode
-from utils import preprocess_image, postprocess, draw_detection
+from utils import preprocess_image, postprocess, draw_detection, non_max_suppression
 from config import anchors, class_names
-
 
 TMPPATH = tempfile.mkdtemp()
 PERFITER = 1000
 
 IMAGE_SHAPE = (0, 0)
+
+
 
 def get_beach(inputs):
     """Get beach image as input."""
@@ -45,17 +46,16 @@ def get_beach(inputs):
     resize_to = shape[1:3]
     print("resize_to:", resize_to)
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dog.jpg")
+    print("path:", path)
     img = PIL.Image.open(path)
     img = img.resize(resize_to, PIL.Image.ANTIALIAS)
     img_np = np.array(img).astype(np.float32)
     img_np = img_np.reshape(shape)
-    #print("img_np:",img_np)
+    # print("img_np:",img_np)
     # vgg16 不需要对图像做处理 其他的需要 
-    img_np = img_np /127.5 -1
-
-    #print("img_np:",img_np)
-    #img_np = img_np /255
+    img_np = img_np / 127.5 - 1
     return {name: img_np}
+
 
 def get_detection(inputs):
     """Get detection image as input."""
@@ -67,7 +67,7 @@ def get_detection(inputs):
     resize_to = shape[1:3]
     print("resize_to:", resize_to)
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "detection_3.jpg")
-    
+
     image = cv2.imread(path)
     IMAGE_SHAPE = image.shape[:2]  # 只取wh，channel=3不取
 
@@ -75,7 +75,27 @@ def get_detection(inputs):
     img = img.resize(resize_to, PIL.Image.ANTIALIAS)
     img_np = np.array(img).astype(np.float32)
     img_np = img_np.reshape(shape)
-    img_np = img_np /255
+    img_np = img_np / 255
+    return {name: img_np}
+
+def get_detection_raw(inputs):
+    """Get detection image as input."""
+    global IMAGE_SHAPE
+    print("get_detection img......")
+    for name, shape in inputs.items():
+        print("name:", name, "shape:", shape)
+        break
+    resize_to = shape[1:3]
+    print("resize_to:", resize_to)
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "detection_3.jpg")
+
+    image = cv2.imread(path)
+    IMAGE_SHAPE = image.shape[:2]  # 只取wh，channel=3不取
+
+    img = PIL.Image.open(path)
+    img = img.resize(resize_to, PIL.Image.ANTIALIAS)
+    img_np = np.array(img).astype(np.float32)
+    img_np = img_np.reshape(shape)
     return {name: img_np}
 
 
@@ -103,13 +123,42 @@ def get_ramp(inputs):
         d[k] = np.linspace(1, size, size).reshape(v).astype(np.float32)
     return d
 
+def load_coco_names(file_name):
+    print("load_coco_names")
+    names = {}
+    with open(file_name) as f:
+        for id, name in enumerate(f):
+            names[id] = name
+    return names
+
+def draw_boxes(boxes, img, cls_names, detection_size):
+    print("draw_boxes")
+    draw = ImageDraw.Draw(img)
+
+    for cls, bboxs in boxes.items():
+        color = tuple(np.random.randint(0, 256, 3))
+        for box, score in bboxs:
+            print("score:", score)
+            box = convert_to_original_size(box, np.array(detection_size), np.array(img.size))
+            print("box:", box)
+            draw.rectangle(box, outline=color)
+            print("cls_names[cls]:", cls_names[cls])
+            draw.text(box[:2], '{} {:.2f}%'.format(cls_names[cls], score * 100), fill=color)
+
+
+def convert_to_original_size(box, size, original_size):
+    ratio = original_size / size
+    box = box.reshape(2, 2) * ratio
+    return list(box.reshape(-1))
+
 
 _INPUT_FUNC_MAPPING = {
     "get_beach": get_beach,
     "get_random": get_random,
     "get_random256": get_random256,
     "get_ramp": get_ramp,
-    "get_detection": get_detection
+    "get_detection": get_detection,
+    "get_detection_raw": get_detection_raw
 }
 
 
@@ -144,7 +193,7 @@ class Test(object):
 
     def __init__(self, url, local, make_input, input_names, output_names,
                  disabled=False, more_inputs=None, rtol=0.01, atol=0.,
-                 check_only_shape=False, model_type="frozen"):
+                 check_only_shape=False, model_type="frozen", force_input_shape=False):
         self.url = url
         self.make_input = make_input
         self.local = local
@@ -159,6 +208,7 @@ class Test(object):
         self.tf_runtime = 0
         self.onnx_runtime = 0
         self.model_type = model_type
+        self.force_input_shape = force_input_shape
 
     def download_file(self):
         """Download file from url."""
@@ -199,31 +249,45 @@ class Test(object):
 
     def show_result(self, result, name):
 
+        print(name, "result[0].shape :", result[0].shape)
+
         if result[0].shape == (1, 1001):
-            print(name, " result:",result)
-            print(name, " result[0].shape:",result[0].shape)     
+            print(name, " result:", result)
+            print(name, " result[0].shape:", result[0].shape)
             index = np.argmax(result[0], axis=1)
             print(name, " index:", index)
         # resnet v1 50 的版本需要 这样去检测 index 它的 shape 维数比较多 1000 类
 
         if result[0].shape == (1, 1, 1, 1001) or result[0].shape == (1, 1, 1, 1000):
-            print(name, " result.shape:",result[0][0][0].shape)
+            print(name, " result.shape:", result[0][0][0].shape)
             index = np.argmax(result[0][0][0], axis=1)
             print(name, "\t result[0][0][0][index]:", result[0][0][0][0][index])
             print(name, "\t index:", index)
 
         # 检测网络 yolov2
         if result[0].shape == (1, 169, 5, 4):
-            print(name, " bboxes--result[0].shape:",result[0].shape)
-            print(name, " obj--result[1].shape:",result[1].shape)
-            print(name, " classes--result[2].shape:",result[2].shape)
+            print(name, " bboxes--result[0].shape:", result[0].shape)
+            print(name, " obj--result[1].shape:", result[1].shape)
+            print(name, " classes--result[2].shape:", result[2].shape)
             print("len(result):", len(result))
             bboxes, scores, class_max_index = postprocess(result[0], result[1], result[2], image_shape=IMAGE_SHAPE)
             print(name, "\n  postprocess done")
             print(name, " bboxes:", bboxes)
             print(name, " scores:", scores)
-            print(name, " class_max_index:", class_max_index)    
+            print(name, " class_max_index:", class_max_index)
 
+        if result[0].shape == (1, 10647, 85):
+            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "detection_3.jpg")
+            img = Image.open(path)
+
+            classes = load_coco_names("yolo_coco_classes.txt")
+
+            filtered_boxes = non_max_suppression(result[0], confidence_threshold=0.5,
+                                                 iou_threshold=0.4)
+
+            draw_boxes(filtered_boxes, img, classes, (416, 416))
+
+            img.save("detection_result.jpg")
 
     def run_tensorflow(self, sess, inputs):
         print('run_tensorflow(): so we have a reference output')
@@ -233,22 +297,20 @@ class Test(object):
             k = sess.graph.get_tensor_by_name(k)
             feed_dict[k] = v
         result = sess.run(self.output_names, feed_dict=feed_dict)
-        
+        print("run_tensorflow result:", result)
         self.show_result(result, "tensorflow")
-        
+
         if self.perf:
             start = time.time()
             for _ in range(PERFITER):
                 _ = sess.run(self.output_names, feed_dict=feed_dict)
             self.tf_runtime = time.time() - start
         return result
-       
 
     @staticmethod
-    def to_onnx(tf_graph, opset=None):
+    def to_onnx(tf_graph, opset=None, shape_override=None):
         """Convert graph to tensorflow."""
-        return process_tf_graph(tf_graph, continue_on_error=False, opset=opset)
-
+        return process_tf_graph(tf_graph, continue_on_error=False, opset=opset, shape_override=shape_override)
 
     def run_caffe2(self, name, onnx_graph, inputs):
         """Run test again caffe2 backend."""
@@ -258,8 +320,6 @@ class Test(object):
         prepared_backend = caffe2.python.onnx.backend.prepare(model_proto)
         result = prepared_backend.run(inputs)
 
-        print("caffe2 result[0].shape :", result[0].shape)
-
         self.show_result(result, "caffe2")
 
         if self.perf:
@@ -267,9 +327,8 @@ class Test(object):
             for _ in range(PERFITER):
                 _ = prepared_backend.run(inputs)
             self.onnx_runtime = time.time() - start
-            print("self.onnx_runtime:",self.onnx_runtime)
+            print("self.onnx_runtime:", self.onnx_runtime)
         return result
-
 
     def run_onnxmsrt(self, name, onnx_graph, inputs):
         """Run test against onnxmsrt backend."""
@@ -336,6 +395,8 @@ class Test(object):
         """Run complete test against backend."""
         print(name)
         self.perf = perf
+
+        # get the model
         if self.url:
             _, dir_name = self.download_file()
             model_path = os.path.join(dir_name, self.local)
@@ -353,6 +414,7 @@ class Test(object):
                 tf.train.write_graph(frozen_graph, dir_name, "frozen.pb", as_text=False)
             model_path = os.path.join(dir_name, "frozen.pb")
 
+        # create the input data
         inputs = self.make_input(self.input_names)
         if self.more_inputs:
             for k, v in self.more_inputs.items():
@@ -361,8 +423,9 @@ class Test(object):
         graph_def = graph_pb2.GraphDef()
         with open(model_path, "rb") as f:
             graph_def.ParseFromString(f.read())
-        graph_def = tf2onnx.tfonnx.tf_optimize(None, inputs, self.output_names, graph_def)
 
+        graph_def = tf2onnx.tfonnx.tf_optimize(None, inputs, self.output_names, graph_def)
+        shape_override = {}
         g = tf.import_graph_def(graph_def, name='')
         with tf.Session(graph=g) as sess:
 
@@ -373,13 +436,17 @@ class Test(object):
                 if type != "float32":
                     v = inputs[k]
                     inputs[k] = v.astype(dtype)
+            if self.force_input_shape:
+                shape_override = self.input_names
 
+            # run the model with tensorflow
             tf_results = self.run_tensorflow(sess, inputs)
 
             onnx_graph = None
             print("\ttensorflow", "OK")
             try:
-                onnx_graph = self.to_onnx(sess.graph, opset=opset)
+                # convert model to onnx
+                onnx_graph = self.to_onnx(sess.graph, opset=opset, shape_override=shape_override)
                 print("\tto_onnx", "OK")
                 if debug:
                     onnx_graph.dump_graph()
@@ -446,7 +513,7 @@ def tests_from_yaml(fname):
         input_func = v.get("input_get")
         input_func = _INPUT_FUNC_MAPPING[input_func]
         kwargs = {}
-        for kw in ["rtol", "atol", "disabled", "more_inputs", "check_only_shape", "model_type"]:
+        for kw in ["rtol", "atol", "disabled", "more_inputs", "check_only_shape", "model_type", "force_input_shape"]:
             if v.get(kw) is not None:
                 kwargs[kw] = v[kw]
 
@@ -493,6 +560,7 @@ def main():
                 t = tests[test]
                 if t.perf:
                     f.write("{},{},{}\n".format(test, t.tf_runtime, t.onnx_runtime))
+
 
 if __name__ == "__main__":
     main()

@@ -158,7 +158,8 @@ def _detection_layer(inputs, num_classes, anchors, img_size, data_format):
 
 def _upsample(inputs, out_shape, data_format='NCHW'):
     # we need to pad with one pixel, so we set kernel_size = 3
-    inputs = _fixed_padding(inputs, 3, mode='SYMMETRIC')
+    inputs = _fixed_padding(inputs, 3, mode='CONSTANT')
+    # SYMMETRIC REFLECT
 
     # tf.image.resize_bilinear accepts input in format NHWC
     if data_format == 'NCHW':

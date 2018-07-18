@@ -34,7 +34,7 @@ POSSIBLE_TARGETS = [TARGET_RS4, TARGET_CAFFE2]
 DEFAULT_TARGET = [TARGET_RS4, TARGET_CAFFE2]
 
 
-def tensorflow_to_onnx(graph):
+def tensorflow_to_onnx(graph, shape_override):
     """
     Load tensorflow graph into an onnx graph with minimal rewrites so
     we can use the onnx graph as intermediate graph.
@@ -58,10 +58,12 @@ def tensorflow_to_onnx(graph):
     # create dict with output to shape mappings
     for node in ops:
         for out in node.outputs:
-            try:
-                shape = out.get_shape().as_list()
-            except Exception as ex:
-                shape = []
+            shape = shape_override.get(out.name)
+            if shape is None:
+                try:
+                    shape = out.get_shape().as_list()
+                except Exception as ex:
+                    shape = []
             dtypes[out.name] = utils.map_tf_dtype(out.dtype)
             output_shapes[out.name] = shape
 
@@ -659,6 +661,7 @@ def gatherv2_op(ctx, node, name, args):
 def split_op(ctx, node, name, args):
     # T output = Split(int32 split_dim, T value, @int num_split)
     # T outputs = Split(T input, @INT axis, @INTS split)
+    print("split_op:", node)    
     split_dims = node.inputs[0].get_tensor_value()
     ctx.remove_input(node, node.input[0])
     node.set_attr("axis", split_dims[0])
@@ -668,10 +671,23 @@ def split_op(ctx, node, name, args):
 def splitv_op(ctx, node, name, args):
     # T output = SplitV(T value, Tlen size_splits, int32 split_dim, @int num_split, @type Tlen)
     # T outputs = Split(T input, @INT axis, @INTS split)
+    print("splitv_op:", node)
+
+    shape = ctx.get_shape(node.input[0])
+    print("shape:", shape)
+
     split = node.inputs[1].get_tensor_value()
     split_dims = node.inputs[2].get_tensor_value()
     ctx.remove_input(node, node.input[2])
     ctx.remove_input(node, node.input[1])
+
+    print("split:", split)
+
+    if len(split) == 5 and split[-1] == -1:
+        print("shape[-1]:", shape[-1])
+        split = np.array([split[0], split[1], split[2], split[3], shape[-1]-(split[0]+split[1]+split[2]+split[3])])
+        print("new split:", split)
+
     node.set_attr("split", split)
     node.set_attr("axis", split_dims[0])
     return node
@@ -679,8 +695,8 @@ def splitv_op(ctx, node, name, args):
 
 def pad_op(ctx, node, name, args):
     # T output = Pad(T input, Tpaddings paddings, @type Tpaddings)
-    # T output = Pad(T data, @STRING mode, @INTS pads, @FLOAT value)
-
+    # T output = Pad(T data, @STRING mode, @INTS pads, @FLOAT value)   
+    #print("node:", node) 
     paddings = np.array(node.inputs[1].get_tensor_value()).transpose().flatten()
 
     # 不符合tensorflow   and  onnx spec, 只是为了在 caffe2 能跑
@@ -690,6 +706,12 @@ def pad_op(ctx, node, name, args):
     ctx.remove_input(node, node.input[1])
     node.set_attr("pads", paddings)
 
+    mode = node.get_attr("mode")
+    if mode is not None and mode.s == b'SYMMETRIC':
+        #print("mode.s:", mode.s)
+        del node.attr["mode"]
+        node.set_attr("mode", "edge")
+                
     # 这只是为了在 caffe2 能跑，github 主版本不会有这个处理
     node.data_format = "NHWC"
     nodes = conv_convert_inputs(ctx, node, with_kernel=False)
@@ -726,6 +748,7 @@ def expanddims_op7(ctx, node, name, args):
 
 def stridedslice_op(ctx, node, name, args):
     # for now we implement common cases. Things like strides!=1 are not mappable to onnx.
+    print("stridedslice_op:\n", node)
     not_supported_attr = ["ellipsis_mask", "new_axis_mask"]
     for attr_name in not_supported_attr:
         attr = node.get_attr(attr_name)
@@ -734,7 +757,10 @@ def stridedslice_op(ctx, node, name, args):
 
     begin = node.inputs[1].get_tensor_value()
     end = node.inputs[2].get_tensor_value()
+    print("begin:", begin)
+    print("end:", end)
     strides = node.inputs[3].get_tensor_value()
+    print("strides:", strides)
     end_mask = node.get_attr("end_mask")
     end_mask = end_mask.i if end_mask is not None else 0
     shrink_axis_mask = node.get_attr("shrink_axis_mask")
@@ -744,6 +770,8 @@ def stridedslice_op(ctx, node, name, args):
     axes = []
     # onnx slice op can't remove a axis, track axis and add a squeeze op if needed
     needs_squeeze = []
+    need_slice_twice = False
+
     for idx in range(len(begin)):
         if strides[idx] != 1:
             raise ValueError("StridedSlice: only strides=1 is supported")
@@ -757,12 +785,23 @@ def stridedslice_op(ctx, node, name, args):
 
         new_begin.append(begin[idx])
         mask = (end_mask >> idx) & 1
+        print("mask:", mask)
         if mask != 0:
             new_end.append(sys.maxsize)
         else:
-            new_end.append(end[idx])
+            new_end.append(end[idx])    
 
+    if len(new_begin) == 4 and new_begin[1] != 0 and new_begin[2] != 0:
+        need_slice_twice = True
+        new_begin = np.array([0, new_begin[1], 0, 0])
+
+    if len(new_end) == 4 and new_end[1] != sys.maxsize and new_end[2] != sys.maxsize:
+        need_slice_twice = True
+        new_end = np.array([sys.maxsize, new_end[1], sys.maxsize, sys.maxsize])        
+
+    print("new_begin:", new_begin)
     node.set_attr("starts", new_begin)
+    print("new_end:", new_end)
     node.set_attr("ends", new_end)
     node.set_attr("axes", axes)
     node.type = "Slice"
@@ -770,7 +809,28 @@ def stridedslice_op(ctx, node, name, args):
     ctx.remove_input(node, node.input[2])
     ctx.remove_input(node, node.input[1])
     nodes = [node]
+
+    # caffe2 不支持多维，这里实现两步一维的
+    if need_slice_twice:
+        print("need_slice_twice:", need_slice_twice)
+        name = utils.make_name(node.name)
+        slice_op = ctx.insert_new_node_on_output("Slice", node.output[0], name)
+
+        new_begin1 = np.array([0, 0, new_begin[1], 0])
+        new_end1 = np.array([sys.maxsize, sys.maxsize, new_end[1], sys.maxsize]) 
+
+        print("new_begin1:", new_begin1)
+        print("new_end1:", new_end1)
+        slice_op.set_attr("starts", new_begin1)     
+        slice_op.set_attr("ends", new_end1)
+        slice_op.set_attr("axes", axes)
+        #slice_op.type = "Slice"                       
+        ctx.copy_shape(node.output[0], slice_op.output[0])  
+        nodes.append(slice_op) 
+        print("slice_op:\n", slice_op)      
+
     if needs_squeeze:
+        print("needs_squeeze:", needs_squeeze)
         name = utils.make_name(node.name)
         squeeze_op = ctx.insert_new_node_on_output("Squeeze", node.output[0], name)
         squeeze_op.set_attr("axes", needs_squeeze)
@@ -789,6 +849,7 @@ def stridedslice_op(ctx, node, name, args):
         cast_op.set_attr("to", input_dtype)
         ctx.copy_shape(node.input[0], cast_op.output[0])
         nodes.append(cast_op)
+
     return nodes
 
 
@@ -1094,6 +1155,7 @@ _OPSET_4 = {
     "NoOp": (no_op, []),
     "NotEqual": (direct_op, ["Not"]),
     "Pad": (pad_op, []),
+    "MirrorPad": (pad_op, ["Pad"]),
     "Placeholder": (placeholder_op, []),
     "PlaceholderV2": (placeholder_op, []),
     "PlaceholderWithDefault": (placeholder_op, []),
@@ -1313,22 +1375,24 @@ def tensorflow_onnx_mapping(g, continue_on_error, custom_op_handlers):
         if target_opset <= g.opset:
             ops_mapping.update(op_map)
 
+    # apply custom ops on top of the assembled opset. We can either completment the opset
+    # or override existing ops with a custom op.
+    if custom_op_handlers is not None:
+        custom_opset = {k: [v, []] for k, v in custom_op_handlers.items()}
+        ops_mapping.update(custom_opset)
+
     ops = g.get_nodes()
     onnx_nodes = []
     for node in ops:
         op = node.type
         map_info = ops_mapping.get(op)
         if map_info is None:
-            custom_op = custom_op_handlers.get(op)
-            if custom_op is None:
-                if continue_on_error:
-                    unmapped_op[op] += 1
-                    onnx_nodes.append(node)
-                    continue
-                else:
-                    raise ValueError("tensorflow op " + op + " is not supported")
+            if continue_on_error:
+                unmapped_op[op] += 1
+                onnx_nodes.append(node)
+                continue
             else:
-                map_info = (custom_op, [])
+                raise ValueError("tensorflow op " + op + " is not supported")
         mapped_op[op] += 1
         func, args = map_info
         if args:
@@ -1338,9 +1402,9 @@ def tensorflow_onnx_mapping(g, continue_on_error, custom_op_handlers):
             onnx_node = func(g, node, node.name, args)
         except Exception as ex:
             type_, value_, traceback_ = sys.exc_info()
-            ex = traceback.format_exception(type_, value_, traceback_)
+            ex_ext = traceback.format_exception(type_, value_, traceback_)
             if continue_on_error:
-                print(ex)
+                print(ex_ext)
                 onnx_nodes.append(node)
             else:
                 raise ex
@@ -1368,7 +1432,8 @@ def tf_optimize(sess, inputs, outputs, graph_def):
 
 
 def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=None,
-                     opset=None, custom_op_handlers=None, custom_rewriter=None, extra_opset=None):
+                     opset=None, custom_op_handlers=None, custom_rewriter=None,
+                     extra_opset=None, shape_override=None):
     """Convert tensorflow graph to onnx graph.
         Args:
             tf_graph: tensorflow graph
@@ -1391,10 +1456,12 @@ def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=No
                 # if we continue on error, ignore graph cycles so we can report all missing ops
                 pass
 
+    if shape_override is None:
+        shape_override = {}
     if target is None:
         target = DEFAULT_TARGET
 
-    onnx_nodes, op_cnt, attr_cnt, output_shapes, dtypes = tensorflow_to_onnx(tf_graph)
+    onnx_nodes, op_cnt, attr_cnt, output_shapes, dtypes = tensorflow_to_onnx(tf_graph, shape_override)
 
     g = Graph(onnx_nodes, output_shapes, dtypes, target, opset, extra_opset)
     ops = g.get_nodes()
