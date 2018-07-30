@@ -97,14 +97,14 @@ def tensorflow_to_onnx(graph, shape_override):
                 dtypes[out.name] = utils.map_tf_dtype(out.dtype)
 
                 if None in shape:
-                    #print("------shape------:", shape)
-                    shape = utils.middle_node_shape(node.name)        
-                output_shapes[out.name] = shape               
+                    # print("------shape------:", shape)
+                    shape = utils.middle_node_shape(node.name)
+                output_shapes[out.name] = shape
 
-    # minimal conversion of attributes
+                # minimal conversion of attributes
     for node in ops:
         attr = {}
-        takeit = True            
+        takeit = True
         op_cnt[node.type] += 1
         for a in node.node_def.attr:
             attr_cnt[a] += 1
@@ -155,7 +155,7 @@ def tensorflow_to_onnx(graph, shape_override):
                     # print("attr:", attr)
 
                     onnx_node = helper.make_node(node.type, input_names, output_names, name="Preprocessor/sub", **attr)
-                    
+
                 else:
                     # if node.name == "FeatureExtractor/MobilenetV1/MobilenetV1/Conv2d_0/Conv2D":
                     #     #print("--------tf conv node:", node)
@@ -173,7 +173,7 @@ def tensorflow_to_onnx(graph, shape_override):
                     #     print("attr:", attr)                        
 
                     onnx_node = helper.make_node(node.type, input_names, output_names, name=node.name, **attr)
-                
+
                 onnx_nodes.append(onnx_node)
             except Exception as ex:
                 log.error("pass1 convert failed for %s, ex=%s", node, ex)
@@ -370,7 +370,7 @@ def conv_convert_inputs(ctx, node, with_kernel=False, new_kernel_shape=None,
             with_kernel: transpose the kernel
             new_kernel_shape: reshape the kernel
     """
-    #print("conv_convert_inputs")
+    # print("conv_convert_inputs")
     if input_indices is None:
         input_indices = [0]
     if output_indices is None:
@@ -509,7 +509,7 @@ def conv_kernel_shape(ctx, node, input_idx, spatial=2):
 
 
 def conv_op(ctx, node, name, args):
-    #print("conv_op")
+    # print("conv_op")
     # T output = Conv2D(T input, T filter, @list(int) strides, @bool use_cudnn_on_gpu,
     #                       @string padding, @string data_format)
     # T Y = Conv(T X, T W, T B, @AttrType.STRING auto_pad, @AttrType.INTS dilations, @AttrType.INT group,
@@ -634,10 +634,10 @@ def relu6_op(ctx, node, name, args):
     zero_name = utils.make_name(node.name)
     neg = -1
     if neg in shape:
-        #print("------shape------:", shape)
+        # print("------shape------:", shape)
         shape = utils.middle_node_shape(node.name)
-        
-    #print("relu6_op node.input[0] shape:", shape)
+
+    # print("relu6_op node.input[0] shape:", shape)
     zero_node = ctx.make_const(zero_name, "Const", np.zeros(shape, dtype=np.float32))
     six_name = utils.make_name(node.name)
     six = np.zeros(shape, dtype=np.float32)
@@ -716,6 +716,7 @@ def concat_op(ctx, node, name, args):
 
 
 def slice_op(ctx, node, name, args):
+    print("----------------------------------slice_op-----------------------------------------")
     # T output = Slice(T input, Index begin, Index size, @type Index)
     # T output = Slice(T data, @INTS axes, @INTS ends, @INTS starts)
     starts = node.inputs[1].get_tensor_value()
@@ -762,29 +763,6 @@ def splitv_op(ctx, node, name, args):
     node.set_attr("axis", split_dims[0])
     return node
 
-def pad_op(ctx, node, name, args):
-    # T output = Pad(T input, Tpaddings paddings, @type Tpaddings)
-    # T output = Pad(T data, @STRING mode, @INTS pads, @FLOAT value)
-    paddings = np.array(node.inputs[1].get_tensor_value()).transpose().flatten()
-
-    # 不符合tensorflow   and  onnx spec, 只是为了在 caffe2 能跑
-    if not (len(paddings) == 8 and set(paddings[:2] + paddings[4:6]) == {0}):
-        paddings = np.array([0, 0, paddings[1], paddings[2], 0, 0, paddings[5], paddings[6]])
-
-    ctx.remove_input(node, node.input[1])
-    node.set_attr("pads", paddings)
-
-    mode = node.get_attr("mode")
-    if mode is not None and mode.s == b'SYMMETRIC':
-        del node.attr["mode"]
-        node.set_attr("mode", "edge")
-
-    # 这只是为了在 caffe2 能跑，github 主版本不会有这个处理
-    node.data_format = "NHWC"
-    nodes = conv_convert_inputs(ctx, node, with_kernel=False)
-
-    return nodes
-
 
 # def pad_op(ctx, node, name, args):
 #     # T output = Pad(T input, int32 paddings, @type Tpaddings), CONST model using default value
@@ -792,22 +770,60 @@ def pad_op(ctx, node, name, args):
 #     #  or MirrorPad(T input, int32 paddings, @type Tpaddings, @STRING mode), other mode.
 #     # T output = Pad(T data, @STRING mode, @INTS pads, @FLOAT value)
 #     paddings = np.array(node.inputs[1].get_tensor_value()).transpose().flatten()
-#     mode = node.get_attr("mode")
-#     if mode:
-#         mode = mode.s.decode("utf-8").lower()
-#         node.set_attr("mode", mode)
-#     if mode not in [None, "constant", "reflect"]:
-#         raise ValueError(mode + " pad mode is not supported")
 #
-#     if mode in [None, "constant"] and len(node.input) == 3:
-#         const_val = node.inputs[2].get_tensor_value()[0]
-#         node.set_attr("value", const_val)
-#         ctx.remove_input(node, node.input[2])
+#     # 不符合tensorflow  and  onnx spec, 只是为了在 caffe2 能跑
+#     if not (len(paddings) == 8 and set(paddings[:2] + paddings[4:6]) == {0}):
+#         paddings = np.array([0, 0, paddings[1], paddings[2], 0, 0, paddings[5], paddings[6]])
 #
 #     ctx.remove_input(node, node.input[1])
 #     node.set_attr("pads", paddings)
-#     return node
+#
+#     mode = node.get_attr("mode")
+#     if mode is not None and mode.s == b'SYMMETRIC':
+#         del node.attr["mode"]
+#         node.set_attr("mode", "edge")
+#
+#     # 这只是为了在 caffe2 能跑，github 主版本不会有这个处理
+#     node.data_format = "NHWC"
+#     nodes = conv_convert_inputs(ctx, node, with_kernel=False)
+#
+#     return nodes
 
+
+def pad_op(ctx, node, name, args):
+
+    # T output = Pad(T input, int32 paddings, @type Tpaddings), CONST model using default value
+    #  or PadV2(T input, int32 paddings, T constant_value, @type Tpaddings), CONST mode - default value specified
+    #  or MirrorPad(T input, int32 paddings, @type Tpaddings, @STRING mode), other mode.
+    # T output = Pad(T data, @STRING mode, @INTS pads, @FLOAT value)
+    #print("----------------------------pad_op------------------------------")
+    paddings = np.array(node.inputs[1].get_tensor_value()).transpose().flatten()
+
+    # 不符合tensorflow  and  onnx spec, 只是为了在 caffe2 能跑
+    if not (len(paddings) == 8 and set(paddings[:2] + paddings[4:6]) == {0}):
+        paddings = np.array([0, 0, paddings[1], paddings[2], 0, 0, paddings[5], paddings[6]])
+
+    mode = node.get_attr("mode")
+    #print("mode:", mode)
+    if mode:
+        mode = mode.s.decode("utf-8").lower()
+        node.set_attr("mode", mode)
+    if mode not in [None, "constant", "reflect"]:
+        raise ValueError(mode + " pad mode is not supported")
+
+    if mode in [None, "constant"] and len(node.input) == 3:
+        const_val = node.inputs[2].get_tensor_value()[0]
+        node.set_attr("value", const_val)
+        ctx.remove_input(node, node.input[2])
+
+    ctx.remove_input(node, node.input[1])
+    node.set_attr("pads", paddings)
+
+    # 这只是为了在 caffe2 能跑，github 主版本不会有这个处理
+    node.data_format = "NHWC"
+    nodes = conv_convert_inputs(ctx, node, with_kernel=False)
+
+    return nodes
 
 
 def rsqrt_op(ctx, node, name, args):
@@ -838,6 +854,7 @@ def expanddims_op7(ctx, node, name, args):
 
 
 def stridedslice_op(ctx, node, name, args):
+    print("----------------------------------stridedslice_op-----------------------------------------")
     # for now we implement common cases. Things like strides!=1 are not mappable to onnx.
     not_supported_attr = ["ellipsis_mask", "new_axis_mask"]
     for attr_name in not_supported_attr:
@@ -1499,7 +1516,7 @@ def tensorflow_onnx_mapping(g, continue_on_error, custom_op_handlers):
 
 
 def tf_optimize(sess, inputs, outputs, graph_def):
-    #print("tf_optimize begin")
+    # print("tf_optimize begin")
     """Optimize tensorflow graph for inference."""
     transforms = [
         "fold_constants(ignore_errors=true)",
@@ -1507,7 +1524,9 @@ def tf_optimize(sess, inputs, outputs, graph_def):
         "fold_old_batch_norms",
 
     ]
+    # TODO 这俩 在 研究 研究
     needed_names = [utils.node_name(i) for i in inputs] + [utils.node_name(i) for i in outputs]
+    print("---------------needed_names:", needed_names)
     graph_def = graph_util.extract_sub_graph(graph_def, needed_names)
     graph_def = TransformGraph(graph_def, inputs, outputs, transforms)
     return graph_def
@@ -1531,7 +1550,7 @@ def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=No
     """
 
     def topological_sort(ops):
-        #print("process_tf_graph--> topological_sort")
+        # print("process_tf_graph--> topological_sort")
         if not continue_on_error:
             g.topological_sort(ops)
         else:

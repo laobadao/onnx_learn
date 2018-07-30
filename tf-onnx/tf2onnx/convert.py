@@ -34,7 +34,9 @@ def get_args():
     parser.add_argument("--input", required=True, help="input model file")
     parser.add_argument("--output", help="output model file")
     parser.add_argument("--inputs", required=True, help="model input_names")
+    parser.add_argument("--middle_inputs", default=None, help="model middle input_names")
     parser.add_argument("--outputs", required=True, help="model output_names")
+    parser.add_argument("--middle_outputs", default=None, help="model middle output_names")
     parser.add_argument("--opset", type=int, default=None, help="highest opset to use")
     parser.add_argument("--custom-ops", help="list of custom ops")
     parser.add_argument("--unknown-dim", type=int, default=1, help="default for unknown dimensions")
@@ -61,6 +63,11 @@ def get_args():
         args.shape_override = shapes
     if args.outputs:
         args.outputs = args.outputs.split(",")
+    if args.middle_outputs:
+        args.middle_outputs = args.middle_outputs.split(",")
+
+    if args.middle_inputs:
+        args.middle_inputs = args.middle_inputs.split(",")
     if args.target:
         args.target = args.target.split(",")
         for target in args.target:
@@ -99,28 +106,18 @@ def main():
         graph_def.ParseFromString(f.read())
     print("args.inputs:", args.inputs)    
     print("args.outputs:", args.outputs)
+    print("args.middle_inputs:", args.middle_inputs)
+    print("args.middle_outputs:", args.middle_outputs)
 
-    graph_def = tf_optimize(None, args.inputs, args.outputs, graph_def)
+    if args.middle_outputs:
+        graph_def = tf_optimize(None, args.inputs, args.middle_outputs, graph_def)
+    else:
+        graph_def = tf_optimize(None, args.inputs, args.outputs, graph_def)
 
     with tf.Graph().as_default() as tf_graph:
         tf.import_graph_def(graph_def, name='')
 
     with tf.Session(graph=tf_graph) as sess:
-
-        # if args.outputs == ['Squeeze:0', 'concat_1:0']:
-        #     output_graph_def = graph_util.convert_variables_to_constants(  # 模型持久化，将变量值固定
-        #      sess,
-        #      graph_def,
-        #      ['Squeeze', 'concat_1']  # 如果有多个输出节点，以逗号隔开
-        #        )
-
-        #     output_graph = os.path.join(MODEL_DIR, MODEL_NAME)  # PB模型保存路径
-
-        #     with tf.gfile.GFile(output_graph, "wb") as f:  # 保存模型
-        #         f.write(output_graph_def.SerializeToString())  # 序列化输出
-
-        #     print("%d ops in the final graph." % len(output_graph_def.node))  # 得到当前图有几个操作节点
-
 
         g = process_tf_graph(tf_graph,
                              continue_on_error=args.continue_on_error,
@@ -131,9 +128,17 @@ def main():
                              extra_opset=extra_opset,
                              shape_override=args.shape_override)
 
+    final_inputs = args.inputs
+    final_outputs = args.outputs
+
+    if args.middle_outputs:
+        final_outputs = args.middle_outputs
+    if args.middle_inputs:
+        final_inputs = args.middle_inputs
+
     model_proto = g.make_model(
-        "converted from {}".format(args.input), args.inputs, args.outputs,
-        optimize=not args.continue_on_error)
+            "converted from {}".format(args.input), final_inputs, final_outputs,
+            optimize=not args.continue_on_error)
 
     # write onnx graph
     if args.output:

@@ -396,7 +396,7 @@ class Graph(object):
         # create output_tensor_values
         output_tensor_values = []
         for name in output_names:
-            dtype = self.get_dtype(name);
+            dtype = self.get_dtype(name)
             if not dtype:
                 raise ValueError("cannot found the output dtype for " + name)
             v = helper.make_tensor_value_info(name, dtype, self.get_shape(name))
