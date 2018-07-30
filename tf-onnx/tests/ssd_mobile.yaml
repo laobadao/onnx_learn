@@ -4,5 +4,6 @@ ssd_mobile:
   inputs:
     "image_tensor:0": [1, 300, 300, 3]
   outputs:
-    - Squeeze:0
-    - concat_1:0
+    - Postprocessor/ExpandDims_1:0
+    - Postprocessor/raw_box_scores:0
+    

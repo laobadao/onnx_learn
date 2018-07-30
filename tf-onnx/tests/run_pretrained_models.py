@@ -326,15 +326,15 @@ class Test(object):
             misc.imsave(save_result_img, RAW_IMAGE_NP)
 
         elif name == "ssd_caffe2":
-            print("----------------ssd_caffe2  show result begin ")
+            print("----------------ssd_caffe2-----------  show result begin ")
             print("ssd caffe2 result[0]:", result[0].shape)
             print("ssd caffe2 result[1]:", result[1].shape)
 
             result_0_diff = RAW_BOX_LOCATIONS - result[0]
             result_1_diff = RAW_BOX_SCORES - result[1]
             #
-            print("result_0_diff:", result_0_diff)
-            print("result_1_diff:", result_1_diff)
+            print("result_0_diff:\n", result_0_diff)
+            print("result_1_diff:\n", result_1_diff)
 
 
         else:
@@ -569,8 +569,13 @@ class Test(object):
 
             result = sess.run(tensor_dict, feed_dict=feed_dict)
 
-            print("TF_SSD_BOXES sub:", TF_SSD_BOXES - result['detection_boxes'][0])
-            print("TF_SSD_SCORES sub:", TF_SSD_SCORES - result['detection_scores'][0])
+            # print("TF_SSD_BOXES:", TF_SSD_BOXES)
+            # print("TF_SSD_SCORES:", TF_SSD_SCORES)
+            # print("result['detection_boxes'][0]:", result['detection_boxes'][0])
+            # print("result['detection_scores'][0]:", result['detection_scores'][0])
+
+            print("TF_SSD_BOXES sub\n:", TF_SSD_BOXES - result['detection_boxes'][0])
+            print("TF_SSD_SCORES sub\n:", TF_SSD_SCORES - result['detection_scores'][0])
 
             result['num_detections'] = int(result['num_detections'][0])
             result['detection_classes'] = result[
@@ -581,7 +586,6 @@ class Test(object):
                 result['detection_masks'] = result['detection_masks'][0]
 
             self.show_result(result, "ssd_tf_caffe2_post")
-            result =None
 
         return result
 
