@@ -22,21 +22,36 @@ from tensorflow.core.framework import graph_pb2
 from tf2onnx.tfonnx import process_tf_graph
 from tensorflow.python.framework.graph_util import convert_variables_to_constants
 from PIL import Image, ImageDraw
-import caffe2.python.onnx.backend
-from caffe2.python import core, workspace
-from caffe2.proto import caffe2_pb2
 
+from object_detection.utils import ops as utils_ops
 import cv2
-from decode import decode
+# from decode import decode
 from utils import preprocess_image, postprocess, draw_detection, non_max_suppression
-from config import anchors, class_names
+from object_detection.utils import label_map_util
+from object_detection.utils import visualization_utils as vis_util
+# from config import anchors, class_names
+from scipy import misc
+import onnx
 
 TMPPATH = tempfile.mkdtemp()
 PERFITER = 1000
 
 IMAGE_SHAPE = (0, 0)
+PATH_TO_LABELS = os.path.join('/data1/home/nntool/jjzhao/tensorflow-onnx/tests/data', 'mscoco_label_map.pbtxt')
 
+NUM_CLASSES = 90
 
+RAW_IMAGE_NP = None
+
+PREPROCESSOR_SUB = None
+
+SSD_SQUEEZE = None
+SSD_CONCAT_1 = None
+TF_SSD_BOXES = None
+TF_SSD_BOXES = None
+TF_SSD_SCORES = None
+RAW_BOX_SCORES = None
+RAW_BOX_LOCATIONS = None
 
 def get_beach(inputs):
     """Get beach image as input."""
@@ -78,6 +93,7 @@ def get_detection(inputs):
     img_np = img_np / 255
     return {name: img_np}
 
+
 def get_detection_raw(inputs):
     """Get detection image as input."""
     global IMAGE_SHAPE
@@ -97,6 +113,31 @@ def get_detection_raw(inputs):
     img_np = np.array(img).astype(np.float32)
     img_np = img_np.reshape(shape)
     return {name: img_np}
+
+
+def load_image_into_numpy_array(image):
+    (im_width, im_height) = image.size
+    return np.array(image.getdata()).reshape(
+        (im_height, im_width, 3)).astype(np.uint8)
+
+
+def get_ssd_image(inputs):
+    """Get ssd image as inputs and preprocessor."""
+    global IMAGE_SHAPE
+    global RAW_IMAGE_NP
+    for name, shape in inputs.items():
+        print("name:", name, "shape:", shape)
+        break
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "detection_3.jpg")
+    image = Image.open(path)
+    print("image_path:", path)
+    # the array based representation of the image will be used later in order to prepare the
+    # result image with boxes and labels on it.
+    image_np = load_image_into_numpy_array(image)
+    RAW_IMAGE_NP = image_np
+    # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+    image_np_expanded = np.expand_dims(image_np, axis=0)
+    return {name: image_np_expanded}
 
 
 def get_random(inputs):
@@ -123,6 +164,7 @@ def get_ramp(inputs):
         d[k] = np.linspace(1, size, size).reshape(v).astype(np.float32)
     return d
 
+
 def load_coco_names(file_name):
     print("load_coco_names")
     names = {}
@@ -130,6 +172,7 @@ def load_coco_names(file_name):
         for id, name in enumerate(f):
             names[id] = name
     return names
+
 
 def draw_boxes(boxes, img, cls_names, detection_size):
     print("draw_boxes")
@@ -158,7 +201,8 @@ _INPUT_FUNC_MAPPING = {
     "get_random256": get_random256,
     "get_ramp": get_ramp,
     "get_detection": get_detection,
-    "get_detection_raw": get_detection_raw
+    "get_detection_raw": get_detection_raw,
+    "get_ssd_image": get_ssd_image,
 }
 
 
@@ -249,45 +293,90 @@ class Test(object):
 
     def show_result(self, result, name):
 
-        print(name, "result[0].shape :", result[0].shape)
+        if name == "ssd" or name == "ssd_tf_caffe2_post":
 
-        if result[0].shape == (1, 1001):
-            print(name, " result:", result)
-            print(name, " result[0].shape:", result[0].shape)
-            index = np.argmax(result[0], axis=1)
-            print(name, " index:", index)
-        # resnet v1 50 的版本需要 这样去检测 index 它的 shape 维数比较多 1000 类
+            print("--------show_result----------", name, "-----------------")
+            label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
+            categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES,
+                                                                        use_display_name=True)
+            category_index = label_map_util.create_category_index(categories)
 
-        if result[0].shape == (1, 1, 1, 1001) or result[0].shape == (1, 1, 1, 1000):
-            print(name, " result.shape:", result[0][0][0].shape)
-            index = np.argmax(result[0][0][0], axis=1)
-            print(name, "\t result[0][0][0][index]:", result[0][0][0][0][index])
-            print(name, "\t index:", index)
+            vis_util.visualize_boxes_and_labels_on_image_array(
+                RAW_IMAGE_NP,
+                result['detection_boxes'],
+                result['detection_classes'],
+                result['detection_scores'],
+                category_index,
+                instance_masks=result.get('detection_masks'),
+                use_normalized_coordinates=True,
+                line_thickness=8)
 
-        # 检测网络 yolov2
-        if result[0].shape == (1, 169, 5, 4):
-            print(name, " bboxes--result[0].shape:", result[0].shape)
-            print(name, " obj--result[1].shape:", result[1].shape)
-            print(name, " classes--result[2].shape:", result[2].shape)
-            print("len(result):", len(result))
-            bboxes, scores, class_max_index = postprocess(result[0], result[1], result[2], image_shape=IMAGE_SHAPE)
-            print(name, "\n  postprocess done")
-            print(name, " bboxes:", bboxes)
-            print(name, " scores:", scores)
-            print(name, " class_max_index:", class_max_index)
+            print("output_dict['detection_boxes']:", result['detection_boxes'].shape)
+            print("output_dict['detection_classes']:", result['detection_classes'].shape)
+            print("output_dict['detection_scores']:", result['detection_scores'].shape)
+            print("RAW_IMAGE_NP:", RAW_IMAGE_NP.shape)
 
-        if result[0].shape == (1, 10647, 85):
-            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "detection_3.jpg")
-            img = Image.open(path)
+            save_result_img = ""
 
-            classes = load_coco_names("yolo_coco_classes.txt")
+            if name == "ssd":
+                save_result_img = "detection_result_tf.png"
+            elif name == "ssd_tf_caffe2_post":
+                save_result_img = "detection_result_caffe2.png"
 
-            filtered_boxes = non_max_suppression(result[0], confidence_threshold=0.5,
-                                                 iou_threshold=0.4)
+            misc.imsave(save_result_img, RAW_IMAGE_NP)
 
-            draw_boxes(filtered_boxes, img, classes, (416, 416))
+        elif name == "ssd_caffe2":
+            print("----------------ssd_caffe2  show result begin ")
+            print("ssd caffe2 result[0]:", result[0].shape)
+            print("ssd caffe2 result[1]:", result[1].shape)
 
-            img.save("detection_result.jpg")
+            result_0_diff = RAW_BOX_LOCATIONS - result[0]
+            result_1_diff = RAW_BOX_SCORES - result[1]
+            #
+            print("result_0_diff:", result_0_diff)
+            print("result_1_diff:", result_1_diff)
+
+
+        else:
+            print(name, "result[0].shape :", result[0].shape)
+
+            if result[0].shape == (1, 1001):
+                print(name, " result:", result)
+                print(name, " result[0].shape:", result[0].shape)
+                index = np.argmax(result[0], axis=1)
+                print(name, " index:", index)
+            # resnet v1 50 的版本需要 这样去检测 index 它的 shape 维数比较多 1000 类
+
+            if result[0].shape == (1, 1, 1, 1001) or result[0].shape == (1, 1, 1, 1000):
+                print(name, " result.shape:", result[0][0][0].shape)
+                index = np.argmax(result[0][0][0], axis=1)
+                print(name, "\t result[0][0][0][index]:", result[0][0][0][0][index])
+                print(name, "\t index:", index)
+
+            # 检测网络 yolov2
+            if result[0].shape == (1, 169, 5, 4):
+                print(name, " bboxes--result[0].shape:", result[0].shape)
+                print(name, " obj--result[1].shape:", result[1].shape)
+                print(name, " classes--result[2].shape:", result[2].shape)
+                print("len(result):", len(result))
+                bboxes, scores, class_max_index = postprocess(result[0], result[1], result[2], image_shape=IMAGE_SHAPE)
+                print(name, "\n  postprocess done")
+                print(name, " bboxes:", bboxes)
+                print(name, " scores:", scores)
+                print(name, " class_max_index:", class_max_index)
+
+            if result[0].shape == (1, 10647, 85):
+                path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "detection_3.jpg")
+                img = Image.open(path)
+
+                classes = load_coco_names("yolo_coco_classes.txt")
+
+                filtered_boxes = non_max_suppression(result[0], confidence_threshold=0.5,
+                                                     iou_threshold=0.4)
+
+                draw_boxes(filtered_boxes, img, classes, (416, 416))
+
+                img.save("detection_result.jpg")
 
     def run_tensorflow(self, sess, inputs):
         print('run_tensorflow(): so we have a reference output')
@@ -297,7 +386,7 @@ class Test(object):
             k = sess.graph.get_tensor_by_name(k)
             feed_dict[k] = v
         result = sess.run(self.output_names, feed_dict=feed_dict)
-        print("run_tensorflow result:", result)
+        # print("run_tensorflow result:", result)
         self.show_result(result, "tensorflow")
 
         if self.perf:
@@ -305,6 +394,195 @@ class Test(object):
             for _ in range(PERFITER):
                 _ = sess.run(self.output_names, feed_dict=feed_dict)
             self.tf_runtime = time.time() - start
+        return result
+
+    def ssd_tensorflow_pre(self, inputs):
+
+        image_value = inputs["image_tensor:0"]
+        print("image_value:", image_value.shape)
+        ops = tf.get_default_graph().get_operations()
+        print("len ops:", len(ops))
+        all_tensor_names = {output.name for op in ops for output in op.outputs}
+        print("len(all_tensor_names):", len(all_tensor_names))
+
+        tensor_dict = {}
+
+        for key in [
+            'num_detections', 'detection_boxes', 'detection_scores',
+            'detection_classes', 'detection_masks'
+        ]:
+            tensor_name = key + ':0'
+            if tensor_name in all_tensor_names:
+                tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(tensor_name)
+
+        print("tensor_dict:", len(tensor_dict))
+
+        if 'detection_masks' in tensor_dict:
+            # The following processing is only for single image
+            detection_boxes = tf.squeeze(tensor_dict['detection_boxes'], [0])
+            detection_masks = tf.squeeze(tensor_dict['detection_masks'], [0])
+            # Reframe is required to translate mask from box coordinates to image coordinates and fit the image size.
+            real_num_detection = tf.cast(tensor_dict['num_detections'][0], tf.int32)
+            detection_boxes = tf.slice(detection_boxes, [0, 0], [real_num_detection, -1])
+            detection_masks = tf.slice(detection_masks, [0, 0, 0], [real_num_detection, -1, -1])
+            detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(
+                detection_masks, detection_boxes, image_value.shape[0], image_value.shape[1])
+            detection_masks_reframed = tf.cast(
+                tf.greater(detection_masks_reframed, 0.5), tf.uint8)
+            # Follow the convention by adding back the batch dimension
+            tensor_dict['detection_masks'] = tf.expand_dims(
+                detection_masks_reframed, 0)
+
+        image_tensor = tf.get_default_graph().get_tensor_by_name('image_tensor:0')
+        print("image_tensor:", image_tensor)
+        print("tensor_dict:", len(tensor_dict))
+
+        return tensor_dict, image_tensor, image_value
+
+    def run_tensorflow_ssd(self, sess, inputs):
+        print("----" * 20)
+        print('run_tensorflow_ssd(): so we have a reference output')
+        """Run model on tensorflow so we have a referecne output."""
+
+        tensor_dict, image_tensor, image_value = self.ssd_tensorflow_pre(inputs)
+
+        # run inference
+        result = sess.run(tensor_dict, feed_dict={image_tensor: image_value})
+
+        global TF_SSD_BOXES
+        global TF_SSD_SCORES
+
+        TF_SSD_BOXES = result['detection_boxes'][0]
+        TF_SSD_SCORES = result['detection_scores'][0]
+
+        print("result['num_detections']:", result['num_detections'])
+
+        result['num_detections'] = int(result['num_detections'][0])
+        result['detection_classes'] = result[
+            'detection_classes'][0].astype(np.uint8)
+        result['detection_boxes'] = result['detection_boxes'][0]
+        result['detection_scores'] = result['detection_scores'][0]
+        if 'detection_masks' in result:
+            result['detection_masks'] = result['detection_masks'][0]
+
+        self.show_result(result, "ssd")
+
+        # print("result:", result)
+        # 'Squeeze': [1, 1917, 4],
+        # 'concat_1': [1, 1917, 91],
+
+        middle_tensor_name = "Preprocessor/sub:0"
+        Squeeze_tensor_name = "Squeeze:0"
+        concat_1_tensor_name = "concat_1:0"
+
+        raw_box_scores_name = 'Postprocessor/raw_box_scores:0'
+        raw_box_locations_name = 'Postprocessor/ExpandDims_1:0'
+
+
+        preprocessor_tensor = tf.get_default_graph().get_tensor_by_name(middle_tensor_name)
+        Squeeze_tensor = tf.get_default_graph().get_tensor_by_name(Squeeze_tensor_name)
+        concat_1_tensor = tf.get_default_graph().get_tensor_by_name(concat_1_tensor_name)
+
+        raw_box_scores_tensor = tf.get_default_graph().get_tensor_by_name(raw_box_scores_name)
+        raw_box_locations_tensor = tf.get_default_graph().get_tensor_by_name(raw_box_locations_name)
+
+        print("preprocessor_tensor:", preprocessor_tensor)
+        print("raw_box_scores_tensor:", raw_box_scores_tensor)
+        print("raw_box_locations_tensor:", raw_box_locations_tensor)
+
+        sess.run(tf.global_variables_initializer())
+
+        global PREPROCESSOR_SUB
+        global SSD_SQUEEZE
+        global SSD_CONCAT_1
+        global RAW_BOX_SCORES
+        global RAW_BOX_LOCATIONS
+
+        middle_output = sess.run(middle_tensor_name, feed_dict={image_tensor: image_value})
+        # squeeze_output = sess.run(Squeeze_tensor_name, feed_dict={image_tensor: image_value})
+        # concat_1_output = sess.run(concat_1_tensor_name, feed_dict={image_tensor: image_value})
+
+        raw_box_scores_output = sess.run(raw_box_scores_name, feed_dict={image_tensor: image_value})
+        raw_box_locations_output = sess.run(raw_box_locations_name, feed_dict={image_tensor: image_value})
+
+        PREPROCESSOR_SUB = middle_output
+        # SSD_SQUEEZE = squeeze_output
+        # SSD_CONCAT_1 = concat_1_output
+        print("middle_output", middle_output.shape)
+        # print("SSD_SQUEEZE", SSD_SQUEEZE.shape)
+        # print("SSD_CONCAT_1", SSD_CONCAT_1.shape)
+
+        print("raw_box_locations_output", raw_box_locations_output.shape)
+        print("raw_box_scores_output", raw_box_scores_output.shape)
+
+        RAW_BOX_LOCATIONS = raw_box_locations_output
+        RAW_BOX_SCORES = raw_box_scores_output
+
+
+        return result
+
+    def run_tf_ssd_post(self, g, inputs):
+
+        print("----" * 20)
+        image_value = inputs["image_tensor:0"]
+        with tf.Session(graph=g) as sess:
+            # TODO caffe2 ssd 输出结果 作为输入 用 tensorflow 进行后处理 不能传 imagetensor
+            # 要传  post 需要的 4 个 inputs 其中两个为 caffe2 的输出
+
+            tensor_dict, image_tensor, image_value = self.ssd_tensorflow_pre(inputs)
+
+            # # run inference
+            # result = sess.run(tensor_dict, feed_dict={image_tensor: image_value})
+
+            image_tensor_name = "image_tensor:0"
+            gather_v3_name = "Preprocessor/map/TensorArrayStack_1/TensorArrayGatherV3:0"
+            #anchor_name = "MultipleGridAnchorGenerator/assert_equal/Assert/Assert:0"
+            # squeeze_tensor_name = "Squeeze:0"
+            # concat_1_tensor_name = "concat_1:0"
+            raw_box_scores_name = 'Postprocessor/raw_box_scores:0'
+            raw_box_locations_name = 'Postprocessor/ExpandDims_1:0'
+
+            stack_1_name = "Postprocessor/stack_1:0"
+
+            # squeeze_tensor = tf.get_default_graph().get_tensor_by_name(squeeze_tensor_name)
+            # concat_1_tensor = tf.get_default_graph().get_tensor_by_name(concat_1_tensor_name)
+            image_tensor = tf.get_default_graph().get_tensor_by_name(image_tensor_name)
+
+            stack_1_tensor = tf.get_default_graph().get_tensor_by_name(stack_1_name)
+            raw_box_scores_tensor = tf.get_default_graph().get_tensor_by_name(raw_box_scores_name)
+            raw_box_locations_tensor = tf.get_default_graph().get_tensor_by_name(raw_box_locations_name)
+            #gather_v3_tensor = tf.get_default_graph().get_tensor_by_name(gather_v3_name)
+            print("stack_1_tensor:", stack_1_tensor)
+
+            sess.run(tf.global_variables_initializer())
+
+            # squeeze_value = SSD_SQUEEZE
+            # concat_1_value = SSD_CONCAT_1
+
+            stack_1_result = sess.run(stack_1_tensor, feed_dict={image_tensor: image_value})
+            print("stack_1_result:", stack_1_result.shape)
+            #
+            # raw_box_scores_output = sess.run(raw_box_scores_name, feed_dict={image_tensor: image_value})
+            # raw_box_locations_output = sess.run(raw_box_locations_name, feed_dict={image_tensor: image_value})
+
+            feed_dict = {stack_1_tensor: stack_1_result, raw_box_scores_tensor: RAW_BOX_SCORES, raw_box_locations_tensor: RAW_BOX_LOCATIONS}
+
+            result = sess.run(tensor_dict, feed_dict=feed_dict)
+
+            print("TF_SSD_BOXES sub:", TF_SSD_BOXES - result['detection_boxes'][0])
+            print("TF_SSD_SCORES sub:", TF_SSD_SCORES - result['detection_scores'][0])
+
+            result['num_detections'] = int(result['num_detections'][0])
+            result['detection_classes'] = result[
+                'detection_classes'][0].astype(np.uint8)
+            result['detection_boxes'] = result['detection_boxes'][0]
+            result['detection_scores'] = result['detection_scores'][0]
+            if 'detection_masks' in result:
+                result['detection_masks'] = result['detection_masks'][0]
+
+            self.show_result(result, "ssd_tf_caffe2_post")
+            result =None
+
         return result
 
     @staticmethod
@@ -317,10 +595,9 @@ class Test(object):
         print("run_caffe2()---------------------------------------------")
         import caffe2.python.onnx.backend
         model_proto = onnx_graph.make_model("test", inputs.keys(), self.output_names)
-        prepared_backend = caffe2.python.onnx.backend.prepare(model_proto)
-        result = prepared_backend.run(inputs)
 
-        self.show_result(result, "caffe2")
+        prepared_backend, ws = caffe2.python.onnx.backend.prepare(model_proto)
+        result = prepared_backend.run(inputs)
 
         if self.perf:
             start = time.time()
@@ -328,6 +605,19 @@ class Test(object):
                 _ = prepared_backend.run(inputs)
             self.onnx_runtime = time.time() - start
             print("self.onnx_runtime:", self.onnx_runtime)
+        return result
+
+    def run_caffe2_ssd(self, name, model_proto, inputs_ssd):
+        """Run test again caffe2 backend."""
+        print("----------------------run_caffe2()  ssd ---------------------------------------------")
+        import caffe2.python.onnx.backend
+        prepared_backend, ws = caffe2.python.onnx.backend.prepare(model_proto)
+
+        result = prepared_backend.run(inputs_ssd)
+
+        # TODO 后处理部分 ssd
+        self.show_result(result, "ssd_caffe2")
+
         return result
 
     def run_onnxmsrt(self, name, onnx_graph, inputs):
@@ -393,7 +683,7 @@ class Test(object):
 
     def run_test(self, name, backend="caffe2", debug=False, onnx_file=None, opset=None, perf=None):
         """Run complete test against backend."""
-        print(name)
+        print("run_test name :", name)
         self.perf = perf
 
         # get the model
@@ -416,17 +706,29 @@ class Test(object):
 
         # create the input data
         inputs = self.make_input(self.input_names)
+        # print("inputs:", inputs)
         if self.more_inputs:
             for k, v in self.more_inputs.items():
                 inputs[k] = v
         tf.reset_default_graph()
         graph_def = graph_pb2.GraphDef()
+        print("model_path:", model_path)
         with open(model_path, "rb") as f:
             graph_def.ParseFromString(f.read())
 
-        graph_def = tf2onnx.tfonnx.tf_optimize(None, inputs, self.output_names, graph_def)
+        print("self.output_names:", self.output_names)
+
+        #if self.output_names == ['Squeeze:0', 'concat_1:0']:
+        if self.output_names == ['Postprocessor/ExpandDims_1:0', 'Postprocessor/raw_box_scores:0']:
+
+            output_names = ['detection_boxes:0', 'detection_scores:0', 'num_detections:0', 'detection_classes:0']
+            graph_def = tf2onnx.tfonnx.tf_optimize(None, inputs, output_names, graph_def)
+        else:
+            graph_def = tf2onnx.tfonnx.tf_optimize(None, inputs, self.output_names, graph_def)
+
         shape_override = {}
         g = tf.import_graph_def(graph_def, name='')
+
         with tf.Session(graph=g) as sess:
 
             # fix inputs if needed
@@ -440,25 +742,53 @@ class Test(object):
                 shape_override = self.input_names
 
             # run the model with tensorflow
-            tf_results = self.run_tensorflow(sess, inputs)
+            if name == "ssd_mobile":
+                tf_results = self.run_tensorflow_ssd(sess, inputs)
+            else:
+                tf_results = self.run_tensorflow(sess, inputs)
 
             onnx_graph = None
             print("\ttensorflow", "OK")
             try:
                 # convert model to onnx
-                onnx_graph = self.to_onnx(sess.graph, opset=opset, shape_override=shape_override)
-                print("\tto_onnx", "OK")
+                #  重新构造ssd-onnx 所需要的 graph
+                if name == "ssd_mobile":
+                    pass
+                else:
+                    onnx_graph = self.to_onnx(sess.graph, opset=opset, shape_override=shape_override)
+
+                print("\t  onnx_graph", "OK")
                 if debug:
                     onnx_graph.dump_graph()
                 if onnx_file:
-                    self.create_onnx_file(name, onnx_graph, inputs, onnx_file)
+                    if name == "ssd_mobile":
+                        pass
+                    else:
+                        self.create_onnx_file(name, onnx_graph, inputs, onnx_file)
+                    print("\t  create_onnx_file", "OK")
             except Exception as ex:
                 print("\tto_onnx", "FAIL", ex)
 
         try:
             onnx_results = None
             if backend == "caffe2":
-                onnx_results = self.run_caffe2(name, onnx_graph, inputs)
+                # TODO 重新构造 inputs
+
+                if name == "ssd_mobile":
+                    model_proto = onnx.load('ssd_mobile/ssd_mobile_1.onnx')
+                    # create the input data
+
+                    print("PREPROCESSOR_SUB:", PREPROCESSOR_SUB.shape)
+                    inputs_ssd = {"Preprocessor/sub:0": PREPROCESSOR_SUB}
+                    onnx_results = self.run_caffe2_ssd("ssd_caffe2", model_proto, inputs_ssd)
+
+                    #TODO 用 tensorflow 进行后处理
+                    self.run_tf_ssd_post(g, inputs)
+
+                    print("run caffe2 done")
+                else:
+                    onnx_results = self.run_caffe2(name, onnx_graph, inputs)
+
             elif backend == "onnxmsrt":
                 onnx_results = self.run_onnxmsrt(name, onnx_graph, inputs)
             elif backend == "onnxmsrtnext":

@@ -17,9 +17,15 @@ import tensorflow as tf
 import tf2onnx.utils
 from tf2onnx.tfonnx import process_tf_graph, tf_optimize, DEFAULT_TARGET, POSSIBLE_TARGETS
 from onnx import helper
+from tensorflow.python.framework import graph_util
+import os.path
 
 
 _TENSORFLOW_DOMAIN = "ai.onnx.converters.tensorflow"
+
+
+MODEL_DIR = "frozen_pb"
+MODEL_NAME = "frozen_model.pb"
 
 
 def get_args():
@@ -88,12 +94,34 @@ def main():
         extra_opset = None
 
     graph_def = tf.GraphDef()
+
     with tf.gfile.FastGFile(args.input, 'rb') as f:
         graph_def.ParseFromString(f.read())
+    print("args.inputs:", args.inputs)    
+    print("args.outputs:", args.outputs)
+
     graph_def = tf_optimize(None, args.inputs, args.outputs, graph_def)
+
     with tf.Graph().as_default() as tf_graph:
         tf.import_graph_def(graph_def, name='')
+
     with tf.Session(graph=tf_graph) as sess:
+
+        # if args.outputs == ['Squeeze:0', 'concat_1:0']:
+        #     output_graph_def = graph_util.convert_variables_to_constants(  # 模型持久化，将变量值固定
+        #      sess,
+        #      graph_def,
+        #      ['Squeeze', 'concat_1']  # 如果有多个输出节点，以逗号隔开
+        #        )
+
+        #     output_graph = os.path.join(MODEL_DIR, MODEL_NAME)  # PB模型保存路径
+
+        #     with tf.gfile.GFile(output_graph, "wb") as f:  # 保存模型
+        #         f.write(output_graph_def.SerializeToString())  # 序列化输出
+
+        #     print("%d ops in the final graph." % len(output_graph_def.node))  # 得到当前图有几个操作节点
+
+
         g = process_tf_graph(tf_graph,
                              continue_on_error=args.continue_on_error,
                              verbose=args.verbose,

@@ -1,0 +1,9 @@
+ssd_mobile:
+  model: /data1/home/nntool/jjzhao/tensorflow-onnx/tests/models/ssd_mobile/frozen_inference_graph.pb
+  input_get: get_ssd_image
+  inputs:
+    "image_tensor:0": [1, 300, 300, 3]
+  outputs:
+    - output_bboxes:0
+    - output_obj:0
+    - output_class:0

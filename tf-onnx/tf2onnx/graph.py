@@ -300,6 +300,10 @@ class Graph(object):
         """Get dtype for node."""
         return self._dtypes.get(name)
 
+    def set_dtype(self, name, val):
+        """Set dtype for node."""
+        self._dtypes[name] = val
+
     def get_shape(self, name):
         """Get shape for node."""
         assert isinstance(name, str)
@@ -326,11 +330,13 @@ class Graph(object):
             self.set_shape(output_name, shape)
 
     def topological_sort(self, ops):
+        print("topological_sort")
         """Topological sort of graph."""
 
         def _push_stack(stack, node, in_stack):
             stack.append(node)
             if node in in_stack:
+                # 循环图 onnx 目前的版本 1.2.2 无法构造循环图，未来 1.3 的版本可以支持
                 raise ValueError('Graph has cycles.')
             else:
                 in_stack[node] = True
@@ -390,13 +396,11 @@ class Graph(object):
         # create output_tensor_values
         output_tensor_values = []
         for name in output_names:
-            op = self.get_node_by_name(name)
-            if op:
-                dtype = op.dtype
-                if not dtype:
-                    continue
-                v = helper.make_tensor_value_info(name, dtype, self.get_shape(name))
-                output_tensor_values.append(v)
+            dtype = self.get_dtype(name);
+            if not dtype:
+                raise ValueError("cannot found the output dtype for " + name)
+            v = helper.make_tensor_value_info(name, dtype, self.get_shape(name))
+            output_tensor_values.append(v)
 
         # update attributes
         ops = []
@@ -431,7 +435,7 @@ class Graph(object):
                                   initializer=initializers,
                                   doc_string=doc)
 
-        kwargs = {"producer_name": "tf2onnx",
+        kwargs = {"producer_name": "zjj",
                   "producer_version": __version__}
         opsets = []
         imp = OperatorSetIdProto()
@@ -506,8 +510,6 @@ class Graph(object):
                 node.input[i] = new_output
                 break
         return new_node
-
-
 
     def insert_new_node_on_output(self, op_type, output_name, name=None, **kwargs):
         """Create and insert a new node into the graph.

@@ -12,6 +12,7 @@ import collections
 import logging
 import sys
 import traceback
+import tensorflow as tf
 
 import numpy as np
 import tf2onnx
@@ -21,6 +22,7 @@ from tensorflow.tools.graph_transforms import TransformGraph
 from tf2onnx import utils
 from tf2onnx.graph import Node, Graph
 from tf2onnx.graph_matcher import *
+from tensorflow.core.framework import types_pb2, tensor_pb2
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("tf2onnx")
@@ -35,6 +37,7 @@ DEFAULT_TARGET = [TARGET_RS4, TARGET_CAFFE2]
 
 
 def tensorflow_to_onnx(graph, shape_override):
+    print("tensorflow_to_onnx")
     """
     Load tensorflow graph into an onnx graph with minimal rewrites so
     we can use the onnx graph as intermediate graph.
@@ -55,6 +58,25 @@ def tensorflow_to_onnx(graph, shape_override):
     # find outputs
     ops = graph.get_operations()
 
+    i = 0
+    while i < len(ops):
+        if "Preprocessor" in ops[i].name:
+            ops.pop(i)
+            i -= 1
+        elif "Assert" in ops[i].name:
+            print("Assert", ops[i].name)
+            ops.pop(i)
+            i -= 1
+        elif ops[i].name == "ToFloat":
+            ops.pop(i)
+            i -= 1
+        # elif ops[i].name == "image_tensor":
+        #     ops.pop(i)
+        #     i -= 1
+        i += 1
+
+    print("1 final len(ops):", len(ops))
+
     # create dict with output to shape mappings
     for node in ops:
         for out in node.outputs:
@@ -64,13 +86,25 @@ def tensorflow_to_onnx(graph, shape_override):
                     shape = out.get_shape().as_list()
                 except Exception as ex:
                     shape = []
-            dtypes[out.name] = utils.map_tf_dtype(out.dtype)
-            output_shapes[out.name] = shape
+
+            if node.name == "image_tensor":
+                # print("out.name:", out.name)
+                # print("out.dtype:", out.dtype)
+                # print("shape:", shape)
+                dtypes["Preprocessor/sub:0"] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
+                output_shapes["Preprocessor/sub:0"] = utils.middle_node_shape(node.name)
+            else:
+                dtypes[out.name] = utils.map_tf_dtype(out.dtype)
+
+                if None in shape:
+                    #print("------shape------:", shape)
+                    shape = utils.middle_node_shape(node.name)        
+                output_shapes[out.name] = shape               
 
     # minimal conversion of attributes
     for node in ops:
         attr = {}
-        takeit = True
+        takeit = True            
         op_cnt[node.type] += 1
         for a in node.node_def.attr:
             attr_cnt[a] += 1
@@ -105,7 +139,41 @@ def tensorflow_to_onnx(graph, shape_override):
             try:
                 input_names = [i.name for i in node.inputs]
                 output_names = [i.name for i in node.outputs]
-                onnx_node = helper.make_node(node.type, input_names, output_names, name=node.name, **attr)
+
+                if node.name == "image_tensor":
+                    # print("----make node ---- begin")
+                    # print("tensorflow node:", node)
+                    # #types_pb2.DT_FLOAT  import 
+                    # print("before output_names:", output_names)
+                    output_names = ['Preprocessor/sub:0']
+                    attr["dtype"] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
+                    attr["shape"] = utils.middle_node_shape(node.name)
+                    # print("node.type:", node.type)
+                    # print("input_names:", input_names)
+                    # print("output_names:", output_names)
+                    # print("node.name:", node.name)
+                    # print("attr:", attr)
+
+                    onnx_node = helper.make_node(node.type, input_names, output_names, name="Preprocessor/sub", **attr)
+                    
+                else:
+                    # if node.name == "FeatureExtractor/MobilenetV1/MobilenetV1/Conv2d_0/Conv2D":
+                    #     #print("--------tf conv node:", node)
+                    #     print("node.type:", node.type)
+                    #     print("input_names:", input_names)
+                    #     print("output_names:", output_names)
+                    #     print("node.name:", node.name)
+                    #     print("attr:", attr)
+                    # if node.name == "FeatureExtractor/MobilenetV1/MobilenetV1/Conv2d_0/BatchNorm/FusedBatchNorm":
+                    #     print("--------tf conv node:", node)
+                    #     print("node.type:", node.type)
+                    #     print("input_names:", input_names)
+                    #     print("output_names:", output_names)
+                    #     print("node.name:", node.name)
+                    #     print("attr:", attr)                        
+
+                    onnx_node = helper.make_node(node.type, input_names, output_names, name=node.name, **attr)
+                
                 onnx_nodes.append(onnx_node)
             except Exception as ex:
                 log.error("pass1 convert failed for %s, ex=%s", node, ex)
@@ -130,6 +198,7 @@ def _convert_shapenode_to_int64(ctx, node, input_number):
         cast_op.set_attr("to", onnx_pb.TensorProto.INT64)
         ctx.copy_shape(name, cast_op.output[0])
         return [cast_op, node]
+
 
 # pylint: disable=W0613,C0111,W0612
 
@@ -184,11 +253,8 @@ def broadcast_op(ctx, node, name, args):
 
 def broadcast_op7(ctx, node, name, args):
     """Elementwise Ops with broadcast flag."""
-    #print("\n broadcast_op7")
     shape0 = ctx.get_shape(node.input[0])
-    #print("shape0:", shape0)
     shape1 = ctx.get_shape(node.input[1])
-    #print("shape1:", shape1)
     if shape0 != shape1:
         # this is more shortcoming in the broadcasting code
         # of caffe2 and winml/rs4 but since those are the primary
@@ -204,13 +270,11 @@ def broadcast_op7(ctx, node, name, args):
             node.input[0] = node.input[1]
             node.input[1] = tmp
         if shape0 and shape1 and len(shape0) == len(shape1) and node.type in ["Mul", "Add"]:
-            if shape0[len(shape0)-1] < shape1[len(shape1)-1]:
+            if shape0[len(shape0) - 1] < shape1[len(shape1) - 1]:
                 tmp = node.input[0]
                 node.input[0] = node.input[1]
                 node.input[1] = tmp
-                   
-    # print("shape0 after:", ctx.get_shape(node.input[0]))
-    # print("shape1 after:", ctx.get_shape(node.input[1]))                
+
     return node
 
 
@@ -246,6 +310,8 @@ def reduce_op(ctx, node, name, args):
 
 
 def placeholder_op(ctx, node, name, args):
+    print("------placeholder_op-----method----")
+    print("placeholder_op:", node)
     input_node = helper.make_tensor_value_info(node.output[0], node.dtype, node.shape)
     ctx.model_inputs.append(input_node)
     return None
@@ -277,9 +343,6 @@ def squeeze_op(ctx, node, name, args):
     return node
 
 
-
-
-
 NCHW_TO_NHWC = [0, 2, 3, 1]
 NHWC_TO_NCHW = [0, 3, 1, 2]
 HWCN_TO_NCHW = [3, 2, 0, 1]
@@ -307,7 +370,7 @@ def conv_convert_inputs(ctx, node, with_kernel=False, new_kernel_shape=None,
             with_kernel: transpose the kernel
             new_kernel_shape: reshape the kernel
     """
-
+    #print("conv_convert_inputs")
     if input_indices is None:
         input_indices = [0]
     if output_indices is None:
@@ -415,6 +478,7 @@ def add_padding(ctx, node, kernel_shape, strides, dilations=None, spatial=2):
         else:
             raise ValueError("invalid padding value: " + padding)
 
+
 def conv_dims_attr(node, name, new_name=None):
     if new_name is None:
         new_name = name
@@ -436,7 +500,7 @@ def conv_dims_attr(node, name, new_name=None):
 
 
 def conv_kernel_shape(ctx, node, input_idx, spatial=2):
-    kernel_shape = ctx.get_shape(node.input[1])
+    kernel_shape = ctx.get_shape(node.input[input_idx])
     if len(kernel_shape) != 2 * spatial:
         raise ValueError("kernel rank must be 2* spatial")
     kernel_shape = kernel_shape[0:spatial]
@@ -445,6 +509,7 @@ def conv_kernel_shape(ctx, node, input_idx, spatial=2):
 
 
 def conv_op(ctx, node, name, args):
+    #print("conv_op")
     # T output = Conv2D(T input, T filter, @list(int) strides, @bool use_cudnn_on_gpu,
     #                       @string padding, @string data_format)
     # T Y = Conv(T X, T W, T B, @AttrType.STRING auto_pad, @AttrType.INTS dilations, @AttrType.INT group,
@@ -452,8 +517,10 @@ def conv_op(ctx, node, name, args):
     kernel_shape = conv_kernel_shape(ctx, node, 1, spatial=2)
     strides = conv_dims_attr(node, "strides")
     dilations = conv_dims_attr(node, "dilations")
+
     add_padding(ctx, node, kernel_shape, strides, dilations=dilations, spatial=2)
     nodes = conv_convert_inputs(ctx, node, with_kernel=True)
+
     return nodes
 
 
@@ -465,6 +532,8 @@ def convtranspose_op(ctx, node, name, args):
 
     # Note: inputs are reversed from what one would expect.
     kernel_shape = conv_kernel_shape(ctx, node, 1)
+
+    # ouput_shape is explicitly specified here, in this case pads values are auto generated/calculated.
     output_shape = node.inputs[0].get_tensor_value()
     if node.is_nhwc():
         new_output_shape = [output_shape[1], output_shape[2]]
@@ -474,15 +543,17 @@ def convtranspose_op(ctx, node, name, args):
 
     strides = conv_dims_attr(node, "strides")
     conv_dims_attr(node, "dilations")
-    add_padding(ctx, node, kernel_shape, strides)
 
-    # remove output_shapes input, swap data and kernel
+    # remove output_shapes input
     ctx.remove_input(node, node.input[0])
+    # swap data and kernel
     t = node.input[0]
     node.input[0] = node.input[1]
     node.input[1] = t
 
     nodes = conv_convert_inputs(ctx, node, with_kernel=True)
+
+    # Note: output_padding, group are left default.
     return nodes
 
 
@@ -530,6 +601,7 @@ def pool_op(ctx, node, name, args):
     # T Y = MaxPool(T X, @AttrType.STRING auto_pad, @AttrType.INTS kernel_shape, @AttrType.INTS pads,
     #                   @AttrType.INTS strides)
     # above seems wrong - input[1] is ksize, input[2] is strides
+    print("pool_op")
     if len(node.input) < 3:
         kernel_shape = node.get_attr("ksize").ints
         kernel_shape = [kernel_shape[1], kernel_shape[2]]
@@ -560,6 +632,12 @@ def relu6_op(ctx, node, name, args):
     node.type = "Max"
     shape = ctx.get_shape(node.input[0])
     zero_name = utils.make_name(node.name)
+    neg = -1
+    if neg in shape:
+        #print("------shape------:", shape)
+        shape = utils.middle_node_shape(node.name)
+        
+    #print("relu6_op node.input[0] shape:", shape)
     zero_node = ctx.make_const(zero_name, "Const", np.zeros(shape, dtype=np.float32))
     six_name = utils.make_name(node.name)
     six = np.zeros(shape, dtype=np.float32)
@@ -661,7 +739,6 @@ def gatherv2_op(ctx, node, name, args):
 def split_op(ctx, node, name, args):
     # T output = Split(int32 split_dim, T value, @int num_split)
     # T outputs = Split(T input, @INT axis, @INTS split)
-    print("split_op:", node)    
     split_dims = node.inputs[0].get_tensor_value()
     ctx.remove_input(node, node.input[0])
     node.set_attr("axis", split_dims[0])
@@ -671,52 +748,66 @@ def split_op(ctx, node, name, args):
 def splitv_op(ctx, node, name, args):
     # T output = SplitV(T value, Tlen size_splits, int32 split_dim, @int num_split, @type Tlen)
     # T outputs = Split(T input, @INT axis, @INTS split)
-    print("splitv_op:", node)
-
     shape = ctx.get_shape(node.input[0])
-    print("shape:", shape)
-
     split = node.inputs[1].get_tensor_value()
     split_dims = node.inputs[2].get_tensor_value()
     ctx.remove_input(node, node.input[2])
     ctx.remove_input(node, node.input[1])
-
-    print("split:", split)
-
+    # onnx-caffe2 caffe2 格式 split 都是正数 [1,1,1,1-1]-->[1,1,1,1,81]  相加为85
     if len(split) == 5 and split[-1] == -1:
-        print("shape[-1]:", shape[-1])
-        split = np.array([split[0], split[1], split[2], split[3], shape[-1]-(split[0]+split[1]+split[2]+split[3])])
-        print("new split:", split)
+        split = np.array(
+            [split[0], split[1], split[2], split[3], shape[-1] - (split[0] + split[1] + split[2] + split[3])])
 
     node.set_attr("split", split)
     node.set_attr("axis", split_dims[0])
     return node
 
-
 def pad_op(ctx, node, name, args):
     # T output = Pad(T input, Tpaddings paddings, @type Tpaddings)
-    # T output = Pad(T data, @STRING mode, @INTS pads, @FLOAT value)   
-    #print("node:", node) 
+    # T output = Pad(T data, @STRING mode, @INTS pads, @FLOAT value)
     paddings = np.array(node.inputs[1].get_tensor_value()).transpose().flatten()
 
     # 不符合tensorflow   and  onnx spec, 只是为了在 caffe2 能跑
     if not (len(paddings) == 8 and set(paddings[:2] + paddings[4:6]) == {0}):
-        paddings = np.array([0, 0,paddings[1], paddings[2], 0, 0, paddings[5], paddings[6]])
+        paddings = np.array([0, 0, paddings[1], paddings[2], 0, 0, paddings[5], paddings[6]])
 
     ctx.remove_input(node, node.input[1])
     node.set_attr("pads", paddings)
 
     mode = node.get_attr("mode")
     if mode is not None and mode.s == b'SYMMETRIC':
-        #print("mode.s:", mode.s)
         del node.attr["mode"]
         node.set_attr("mode", "edge")
-                
+
     # 这只是为了在 caffe2 能跑，github 主版本不会有这个处理
     node.data_format = "NHWC"
     nodes = conv_convert_inputs(ctx, node, with_kernel=False)
 
     return nodes
+
+
+# def pad_op(ctx, node, name, args):
+#     # T output = Pad(T input, int32 paddings, @type Tpaddings), CONST model using default value
+#     #  or PadV2(T input, int32 paddings, T constant_value, @type Tpaddings), CONST mode - default value specified
+#     #  or MirrorPad(T input, int32 paddings, @type Tpaddings, @STRING mode), other mode.
+#     # T output = Pad(T data, @STRING mode, @INTS pads, @FLOAT value)
+#     paddings = np.array(node.inputs[1].get_tensor_value()).transpose().flatten()
+#     mode = node.get_attr("mode")
+#     if mode:
+#         mode = mode.s.decode("utf-8").lower()
+#         node.set_attr("mode", mode)
+#     if mode not in [None, "constant", "reflect"]:
+#         raise ValueError(mode + " pad mode is not supported")
+#
+#     if mode in [None, "constant"] and len(node.input) == 3:
+#         const_val = node.inputs[2].get_tensor_value()[0]
+#         node.set_attr("value", const_val)
+#         ctx.remove_input(node, node.input[2])
+#
+#     ctx.remove_input(node, node.input[1])
+#     node.set_attr("pads", paddings)
+#     return node
+
 
 
 def rsqrt_op(ctx, node, name, args):
@@ -748,7 +839,6 @@ def expanddims_op7(ctx, node, name, args):
 
 def stridedslice_op(ctx, node, name, args):
     # for now we implement common cases. Things like strides!=1 are not mappable to onnx.
-    print("stridedslice_op:\n", node)
     not_supported_attr = ["ellipsis_mask", "new_axis_mask"]
     for attr_name in not_supported_attr:
         attr = node.get_attr(attr_name)
@@ -757,10 +847,7 @@ def stridedslice_op(ctx, node, name, args):
 
     begin = node.inputs[1].get_tensor_value()
     end = node.inputs[2].get_tensor_value()
-    print("begin:", begin)
-    print("end:", end)
     strides = node.inputs[3].get_tensor_value()
-    print("strides:", strides)
     end_mask = node.get_attr("end_mask")
     end_mask = end_mask.i if end_mask is not None else 0
     shrink_axis_mask = node.get_attr("shrink_axis_mask")
@@ -785,23 +872,20 @@ def stridedslice_op(ctx, node, name, args):
 
         new_begin.append(begin[idx])
         mask = (end_mask >> idx) & 1
-        print("mask:", mask)
         if mask != 0:
             new_end.append(sys.maxsize)
         else:
-            new_end.append(end[idx])    
-
+            new_end.append(end[idx])
+            # onnx-caffe2 caffe2 不支持多维，把多维的分成单维的实现
     if len(new_begin) == 4 and new_begin[1] != 0 and new_begin[2] != 0:
         need_slice_twice = True
         new_begin = np.array([0, new_begin[1], 0, 0])
 
     if len(new_end) == 4 and new_end[1] != sys.maxsize and new_end[2] != sys.maxsize:
         need_slice_twice = True
-        new_end = np.array([sys.maxsize, new_end[1], sys.maxsize, sys.maxsize])        
+        new_end = np.array([sys.maxsize, new_end[1], sys.maxsize, sys.maxsize])
 
-    print("new_begin:", new_begin)
     node.set_attr("starts", new_begin)
-    print("new_end:", new_end)
     node.set_attr("ends", new_end)
     node.set_attr("axes", axes)
     node.type = "Slice"
@@ -810,27 +894,19 @@ def stridedslice_op(ctx, node, name, args):
     ctx.remove_input(node, node.input[1])
     nodes = [node]
 
-    # caffe2 不支持多维，这里实现两步一维的
+    # onnx-caffe2 caffe2 不支持多维，把多维的分成单维的实现
     if need_slice_twice:
-        print("need_slice_twice:", need_slice_twice)
         name = utils.make_name(node.name)
         slice_op = ctx.insert_new_node_on_output("Slice", node.output[0], name)
-
         new_begin1 = np.array([0, 0, new_begin[1], 0])
-        new_end1 = np.array([sys.maxsize, sys.maxsize, new_end[1], sys.maxsize]) 
-
-        print("new_begin1:", new_begin1)
-        print("new_end1:", new_end1)
-        slice_op.set_attr("starts", new_begin1)     
+        new_end1 = np.array([sys.maxsize, sys.maxsize, new_end[1], sys.maxsize])
+        slice_op.set_attr("starts", new_begin1)
         slice_op.set_attr("ends", new_end1)
         slice_op.set_attr("axes", axes)
-        #slice_op.type = "Slice"                       
-        ctx.copy_shape(node.output[0], slice_op.output[0])  
-        nodes.append(slice_op) 
-        print("slice_op:\n", slice_op)      
+        ctx.copy_shape(node.output[0], slice_op.output[0])
+        nodes.append(slice_op)
 
     if needs_squeeze:
-        print("needs_squeeze:", needs_squeeze)
         name = utils.make_name(node.name)
         squeeze_op = ctx.insert_new_node_on_output("Squeeze", node.output[0], name)
         squeeze_op.set_attr("axes", needs_squeeze)
@@ -923,6 +999,9 @@ def topk_op(ctx, node, name, args):
     node.set_attr("k", k[0])
     node.type = "TopK"
     ctx.remove_input(node, node.input[1])
+
+    # the second of TopK operator must be INT64 per ONNX requires. 
+    ctx.set_dtype(name + ":1", onnx_pb.TensorProto.INT64)
     return node
 
 
@@ -932,22 +1011,17 @@ def tile_op7(ctx, node, name, args):
 
 
 def spacetodepth_op(ctx, node, name, args):
-    #print("spacetodepth_op:", node)
     block_size = node.get_attr("block_size")
     node.set_attr("blocksize", block_size.i)
     nodes = conv_convert_inputs(ctx, node, with_kernel=False)
     return nodes
 
-    #new_shape = [node_shape[0], int(node_shape[1]/block_size.i), int(node_shape[2]/block_size.i), int(node_shape[3]*block_size.i*block_size.i)]
-
 
 def reshape_op5(ctx, node, name, args):
-    
-    #print("\n reshape_op5 ")
     need_casting = node.dtype in [onnx_pb.TensorProto.INT32,
                                   onnx_pb.TensorProto.INT16,
                                   onnx_pb.TensorProto.INT64]
-                           
+
     # onnx wants reshape.input[1] to have the value be int64 which is not the case for tensorflow.
     nodes = _convert_shapenode_to_int64(ctx, node, 1)
     if not need_casting:
@@ -967,7 +1041,7 @@ def reshape_op5(ctx, node, name, args):
         output_cast.set_attr("to", node.dtype)
         ctx.copy_shape(name, output_cast.output[0])
         nodes.append(output_cast)
-    return [input_cast] + nodes    
+    return [input_cast] + nodes
 
 
 def reshape_op(ctx, node, name, args):
@@ -983,6 +1057,7 @@ def reshape_op(ctx, node, name, args):
     ctx.set_shape(node.output[0], shape)
     return node
 
+
 def minmax_op(ctx, node, name, args):
     # tensorflow minimum/maximum support broadcast. Onnx <= opset 7 does not.
     # inject a add(0) as 'broadcast' operator if needed.
@@ -995,7 +1070,9 @@ def minmax_op(ctx, node, name, args):
         new_nodes = []
         for i in needs_broadcast_op:
             input_node = node.inputs[i]
-            dtype = ctx.dtypes[node.input[i]]
+            # we don't track dtype for inserted ops but we know the output dtype here is
+            # the one we want.
+            dtype = ctx.get_dtype(node.output[0])
             zero_name = utils.make_name(input_node.name)
             ctx.make_const(zero_name, "Const", np.zeros(shapeo, dtype=utils.ONNX_TO_NUMPY_DTYPE[dtype]))
             op_name = utils.make_name(input_node.name)
@@ -1027,7 +1104,7 @@ def pack_op(ctx, node, name, args):
     output_name = op_name + ":0"
     concat = Node(helper.make_node("Concat", inputs, [output_name], name=op_name, axis=axis), ctx)
     ctx.copy_shape(node.output[0], concat.output[0])
-    ctx.replace_all_inputs(ctx.get_nodes(), node.output[0], output_name)    
+    ctx.replace_all_inputs(ctx.get_nodes(), node.output[0], output_name)
     return [concat] + nodes
 
 
@@ -1096,7 +1173,7 @@ def fused_batchnorm_op7(ctx, node, name, args):
     is_test = node.get_attr("is_training")
     if is_test.i == 0:
         output_len = len(node.output)
-        for i in range(output_len-1):
+        for i in range(output_len - 1):
             del node.output[1]
     nodes = conv_convert_inputs(ctx, node, with_kernel=False)
     return nodes
@@ -1150,12 +1227,13 @@ _OPSET_4 = {
     "Mean": (reduce_op, ["ReduceMean"]),
     "Min": (reduce_op, ["ReduceMin"]),
     "Minimum": (minmax_op, ["Min"]),
+    "MirrorPad": (pad_op, ["Pad"]),
     "Mul": (broadcast_op, []),
     "Neg": (direct_op, []),
     "NoOp": (no_op, []),
     "NotEqual": (direct_op, ["Not"]),
     "Pad": (pad_op, []),
-    "MirrorPad": (pad_op, ["Pad"]),
+    "PadV2": (pad_op, ["Pad"]),
     "Placeholder": (placeholder_op, []),
     "PlaceholderV2": (placeholder_op, []),
     "PlaceholderWithDefault": (placeholder_op, []),
@@ -1366,6 +1444,7 @@ def rewrite_flatten(g, ops):
 
 
 def tensorflow_onnx_mapping(g, continue_on_error, custom_op_handlers):
+    print("tensorflow_onnx_mapping......")
     mapped_op = collections.Counter()
     unmapped_op = collections.Counter()
 
@@ -1400,6 +1479,7 @@ def tensorflow_onnx_mapping(g, continue_on_error, custom_op_handlers):
             args = args[1:]
         try:
             onnx_node = func(g, node, node.name, args)
+
         except Exception as ex:
             type_, value_, traceback_ = sys.exc_info()
             ex_ext = traceback.format_exception(type_, value_, traceback_)
@@ -1419,11 +1499,13 @@ def tensorflow_onnx_mapping(g, continue_on_error, custom_op_handlers):
 
 
 def tf_optimize(sess, inputs, outputs, graph_def):
+    #print("tf_optimize begin")
     """Optimize tensorflow graph for inference."""
     transforms = [
         "fold_constants(ignore_errors=true)",
         "fold_batch_norms",
         "fold_old_batch_norms",
+
     ]
     needed_names = [utils.node_name(i) for i in inputs] + [utils.node_name(i) for i in outputs]
     graph_def = graph_util.extract_sub_graph(graph_def, needed_names)
@@ -1434,6 +1516,7 @@ def tf_optimize(sess, inputs, outputs, graph_def):
 def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=None,
                      opset=None, custom_op_handlers=None, custom_rewriter=None,
                      extra_opset=None, shape_override=None):
+    print("process_tf_graph")
     """Convert tensorflow graph to onnx graph.
         Args:
             tf_graph: tensorflow graph
@@ -1446,7 +1529,9 @@ def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=No
         Return:
             onnx graph
     """
+
     def topological_sort(ops):
+        #print("process_tf_graph--> topological_sort")
         if not continue_on_error:
             g.topological_sort(ops)
         else:
@@ -1463,7 +1548,10 @@ def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=No
 
     onnx_nodes, op_cnt, attr_cnt, output_shapes, dtypes = tensorflow_to_onnx(tf_graph, shape_override)
 
+    print("!!! len(onnx_nodes):", len(onnx_nodes))
+
     g = Graph(onnx_nodes, output_shapes, dtypes, target, opset, extra_opset)
+
     ops = g.get_nodes()
 
     # rewrite graph
@@ -1478,7 +1566,9 @@ def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=No
 
     if custom_op_handlers is None:
         custom_op_handlers = {}
+
     mapped_op, unmapped_op = tensorflow_onnx_mapping(g, continue_on_error, custom_op_handlers)
+
     topological_sort(g.get_nodes())
     g.update_proto()
     if verbose:
