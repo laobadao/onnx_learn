@@ -84,6 +84,7 @@ def default_custom_op_handler(ctx, node, name, args):
 
 
 def main():
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     args = get_args()
 
     print("using tensorflow={}, onnx={}".format(tf.__version__, onnx.__version__))
@@ -126,7 +127,8 @@ def main():
                              opset=args.opset,
                              custom_op_handlers=custom_ops,
                              extra_opset=extra_opset,
-                             shape_override=args.shape_override)
+                             shape_override=args.shape_override,
+                             middle_inputs=args.middle_inputs)
 
     final_inputs = args.inputs
     final_outputs = args.outputs

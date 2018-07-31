@@ -36,7 +36,7 @@ POSSIBLE_TARGETS = [TARGET_RS4, TARGET_CAFFE2]
 DEFAULT_TARGET = [TARGET_RS4, TARGET_CAFFE2]
 
 
-def tensorflow_to_onnx(graph, shape_override):
+def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
     print("tensorflow_to_onnx")
     """
     Load tensorflow graph into an onnx graph with minimal rewrites so
@@ -58,22 +58,24 @@ def tensorflow_to_onnx(graph, shape_override):
     # find outputs
     ops = graph.get_operations()
 
-    i = 0
-    while i < len(ops):
-        if "Preprocessor" in ops[i].name:
-            ops.pop(i)
-            i -= 1
-        elif "Assert" in ops[i].name:
-            print("Assert", ops[i].name)
-            ops.pop(i)
-            i -= 1
-        elif ops[i].name == "ToFloat":
-            ops.pop(i)
-            i -= 1
-        # elif ops[i].name == "image_tensor":
-        #     ops.pop(i)
-        #     i -= 1
-        i += 1
+    print("middle_inputs:", middle_inputs)
+    new_input = None
+    if middle_inputs:
+        new_input = middle_inputs[0]
+        print("new_input:", new_input)
+        i = 0
+        while i < len(ops):
+            if "Preprocessor" in ops[i].name:
+                ops.pop(i)
+                i -= 1
+            elif "Assert" in ops[i].name:
+                print("Assert", ops[i].name)
+                ops.pop(i)
+                i -= 1
+            elif ops[i].name == "ToFloat":
+                ops.pop(i)
+                i -= 1
+            i += 1
 
     print("1 final len(ops):", len(ops))
 
@@ -87,12 +89,10 @@ def tensorflow_to_onnx(graph, shape_override):
                 except Exception as ex:
                     shape = []
 
-            if node.name == "image_tensor":
-                # print("out.name:", out.name)
-                # print("out.dtype:", out.dtype)
-                # print("shape:", shape)
-                dtypes["Preprocessor/sub:0"] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
-                output_shapes["Preprocessor/sub:0"] = utils.middle_node_shape(node.name)
+            if node.type == "Placeholder":
+                print("node.type:", node.type)
+                dtypes[new_input] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
+                output_shapes[new_input] = utils.middle_node_shape(node.name)
             else:
                 dtypes[out.name] = utils.map_tf_dtype(out.dtype)
 
@@ -140,38 +140,15 @@ def tensorflow_to_onnx(graph, shape_override):
                 input_names = [i.name for i in node.inputs]
                 output_names = [i.name for i in node.outputs]
 
-                if node.name == "image_tensor":
-                    # print("----make node ---- begin")
-                    # print("tensorflow node:", node)
-                    # #types_pb2.DT_FLOAT  import 
-                    # print("before output_names:", output_names)
-                    output_names = ['Preprocessor/sub:0']
+                if node.type == "Placeholder":
+                    output_names = [new_input]
                     attr["dtype"] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
                     attr["shape"] = utils.middle_node_shape(node.name)
-                    # print("node.type:", node.type)
-                    # print("input_names:", input_names)
-                    # print("output_names:", output_names)
-                    # print("node.name:", node.name)
-                    # print("attr:", attr)
-
-                    onnx_node = helper.make_node(node.type, input_names, output_names, name="Preprocessor/sub", **attr)
+                    new_name = new_input[:-2]
+                    print("new_name:", new_name)
+                    onnx_node = helper.make_node(node.type, input_names, output_names, name=new_name, **attr)
 
                 else:
-                    # if node.name == "FeatureExtractor/MobilenetV1/MobilenetV1/Conv2d_0/Conv2D":
-                    #     #print("--------tf conv node:", node)
-                    #     print("node.type:", node.type)
-                    #     print("input_names:", input_names)
-                    #     print("output_names:", output_names)
-                    #     print("node.name:", node.name)
-                    #     print("attr:", attr)
-                    # if node.name == "FeatureExtractor/MobilenetV1/MobilenetV1/Conv2d_0/BatchNorm/FusedBatchNorm":
-                    #     print("--------tf conv node:", node)
-                    #     print("node.type:", node.type)
-                    #     print("input_names:", input_names)
-                    #     print("output_names:", output_names)
-                    #     print("node.name:", node.name)
-                    #     print("attr:", attr)                        
-
                     onnx_node = helper.make_node(node.type, input_names, output_names, name=node.name, **attr)
 
                 onnx_nodes.append(onnx_node)
@@ -1524,7 +1501,6 @@ def tf_optimize(sess, inputs, outputs, graph_def):
         "fold_old_batch_norms",
 
     ]
-    # TODO 这俩 在 研究 研究
     needed_names = [utils.node_name(i) for i in inputs] + [utils.node_name(i) for i in outputs]
     print("---------------needed_names:", needed_names)
     graph_def = graph_util.extract_sub_graph(graph_def, needed_names)
@@ -1534,7 +1510,7 @@ def tf_optimize(sess, inputs, outputs, graph_def):
 
 def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=None,
                      opset=None, custom_op_handlers=None, custom_rewriter=None,
-                     extra_opset=None, shape_override=None):
+                     extra_opset=None, shape_override=None, middle_inputs=None):
     print("process_tf_graph")
     """Convert tensorflow graph to onnx graph.
         Args:
@@ -1550,7 +1526,6 @@ def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=No
     """
 
     def topological_sort(ops):
-        # print("process_tf_graph--> topological_sort")
         if not continue_on_error:
             g.topological_sort(ops)
         else:
@@ -1565,7 +1540,7 @@ def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=No
     if target is None:
         target = DEFAULT_TARGET
 
-    onnx_nodes, op_cnt, attr_cnt, output_shapes, dtypes = tensorflow_to_onnx(tf_graph, shape_override)
+    onnx_nodes, op_cnt, attr_cnt, output_shapes, dtypes = tensorflow_to_onnx(tf_graph, shape_override, middle_inputs)
 
     print("!!! len(onnx_nodes):", len(onnx_nodes))
 

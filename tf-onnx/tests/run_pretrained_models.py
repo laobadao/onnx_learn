@@ -576,9 +576,10 @@ class Test(object):
         return result
 
     @staticmethod
-    def to_onnx(tf_graph, opset=None, shape_override=None):
+    def to_onnx(tf_graph, opset=None, shape_override=None, middle_input_names=None):
         """Convert graph to tensorflow."""
-        return process_tf_graph(tf_graph, continue_on_error=False, opset=opset, shape_override=shape_override)
+        print("-------------to_onnx--------------:", middle_input_names)
+        return process_tf_graph(tf_graph, continue_on_error=False, opset=opset, shape_override=shape_override, middle_inputs=middle_input_names)
 
     def run_caffe2(self, name, onnx_graph, inputs):
         """Run test again caffe2 backend."""
@@ -586,6 +587,7 @@ class Test(object):
         import caffe2.python.onnx.backend
 
         if self.middle_output_names:
+            print("run_caffe2 middle_output_names")
             model_proto = onnx_graph.make_model("test", inputs.keys(), self.middle_output_names)
         else:
             model_proto = onnx_graph.make_model("test", inputs.keys(), self.output_names)
@@ -613,19 +615,6 @@ class Test(object):
                 _ = prepared_backend.run(inputs)
             self.onnx_runtime = time.time() - start
             print("self.onnx_runtime:", self.onnx_runtime)
-        return result
-
-    def run_caffe2_ssd(self, name, model_proto, inputs_ssd):
-        """Run test again caffe2 backend."""
-        print("----------------------run_caffe2()  ssd ---------------------------------------------")
-        import caffe2.python.onnx.backend
-        prepared_backend, ws = caffe2.python.onnx.backend.prepare(model_proto)
-
-        result = prepared_backend.run(inputs_ssd)
-
-        # TODO 后处理部分 ssd
-        self.show_result(result, "ssd_caffe2")
-
         return result
 
     def run_onnxmsrt(self, name, onnx_graph, inputs):
@@ -794,7 +783,13 @@ class Test(object):
                 try:
                     #  重新构造ssd-onnx 所需要的 graph
                     print("------ssd sess.graph------:", sess1.graph)
-                    onnx_graph = self.to_onnx(sess1.graph, opset=opset, shape_override=shape_override)
+                    input_names = []
+                    for name1, shape in self.middle_input_names.items():
+                        input_names.append(name1)
+                        print("input_name_list:", input_names)
+
+                    onnx_graph = self.to_onnx(sess1.graph, opset=opset, shape_override=shape_override, middle_input_names=input_names)
+
                     print("onnx_graph:", onnx_graph)
                     print("\t  ------ssd onnx_graph------", "OK")
                     if debug:
@@ -812,7 +807,7 @@ class Test(object):
                 onnx_results = self.run_caffe2(name, onnx_graph, inputs)
 
                 if name == "ssd_mobile":
-                    #TODO 用 tensorflow 进行后处理
+                    #TODO 用 tensorflow 进行后处理 改为共同的 decode 和 NMS
 
                     tf.reset_default_graph()
                     graph_def = graph_pb2.GraphDef()
