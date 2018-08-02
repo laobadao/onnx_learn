@@ -4,6 +4,18 @@ ssd_mobile:
   inputs:
     "image_tensor:0": [1, 300, 300, 3]
   outputs:
-    - Postprocessor/ExpandDims_1:0
-    - Postprocessor/raw_box_scores:0
+    - detection_boxes:0
+    - detection_scores:0
+    - num_detections:0
+    - detection_classes:0
+  middle_inputs:
+    "Preprocessor/sub:0": [1, 300, 300, 3]
+  middle_outputs:
+    - Postprocessor/Reshape_1:0
+    - Postprocessor/Reshape:0
+    - Postprocessor/Slice:0
+#    - Postprocessor/ExpandDims_1:0
+#    - Postprocessor/Slice:0
+    # - Postprocessor/raw_box_scores:0
+
     

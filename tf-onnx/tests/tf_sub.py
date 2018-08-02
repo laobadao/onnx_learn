@@ -44,12 +44,60 @@ def main():
     with tf.Graph().as_default() as tf_graph:
         tf.import_graph_def(graph_def, name='')
 
+    ops1 = tf_graph.get_operations()
+
+    tensor_names = []
+
+    outputs_shape = {}
+
+    for node in ops1:
+        for out in node.outputs:
+            tensor_names.append(node.name)
+
+    print("len(tensor_names):", len(tensor_names))
+
+
+    print("len(ops1):", len(ops1))
+
+    image_tensor = tf_graph.get_tensor_by_name('image_tensor:0')
+
+    print("image_tensor before:", image_tensor.shape.as_list())
+
+    need_set_shape = False
+
+    tf.slice()
+
+    INVALID_SHAPE = {None, -1}
+
+    for item in image_tensor.shape.as_list():
+        print("type(item):", type(item))
+        if item in INVALID_SHAPE:
+            print("need set shape item:", item)
+            need_set_shape = True
+            break
+    # if need_set_shape:
+
+        # with tf.Session(graph=tf_graph) as sess1:
+        #     ops = sess1.graph.get_operations()
+        #
+        #     sess1.run(tf.global_variables_initializer())
+        #
+        #     middle_output = sess1.run(preprocessor_tensor, feed_dict={image_tensor: image_value})
+
+
+
+
+    # image_tensor.set_shape([1, 300, 300, 3])
+    # print("image_tensor after:", image_tensor)
+    # image_tensor1 = tf_graph.get_tensor_by_name('image_tensor:0')
+    # print("image_tensor1 get:", image_tensor1)
+
     with tf.Session(graph=tf_graph) as sess:
         ops = sess.graph.get_operations()
         print("len(ops):", len(ops))
 
-        for op in ops:
-            print(op.name)
+        # for op in ops:
+        #     print(op.name)
 
 
 if __name__ == "__main__":

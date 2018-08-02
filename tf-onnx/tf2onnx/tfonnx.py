@@ -60,6 +60,9 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
 
     print("middle_inputs:", middle_inputs)
     new_input = None
+
+    print("-----1----- raw  len(ops):", len(ops))
+    # TODO 优化 删除 预处理部分
     if middle_inputs:
         new_input = middle_inputs[0]
         print("new_input:", new_input)
@@ -77,7 +80,7 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
                 i -= 1
             i += 1
 
-    print("1 final len(ops):", len(ops))
+    print("-------2---------- final len(ops):", len(ops))
 
     # create dict with output to shape mappings
     for node in ops:
@@ -88,17 +91,17 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
                     shape = out.get_shape().as_list()
                 except Exception as ex:
                     shape = []
-
-            if node.type == "Placeholder":
+            # TODO dtype 的问题 Placeholder unit8  float32 怎么确定 新的 input node 的 dtype  就一定是 DT_FLOAT 呢
+            if middle_inputs and node.type == "Placeholder":
                 print("node.type:", node.type)
+                print(node.name, new_input, "------shape------:", shape)
                 dtypes[new_input] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
-                output_shapes[new_input] = utils.middle_node_shape(node.name)
+                #output_shapes[new_input] = utils.middle_node_shape(node.name)
+                output_shapes[new_input] = shape
+                output_shapes[out.name] = shape
             else:
                 dtypes[out.name] = utils.map_tf_dtype(out.dtype)
-
-                if None in shape:
-                    # print("------shape------:", shape)
-                    shape = utils.middle_node_shape(node.name)
+                #print(node.name, "------shape------:", shape)
                 output_shapes[out.name] = shape
 
                 # minimal conversion of attributes
@@ -140,10 +143,12 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
                 input_names = [i.name for i in node.inputs]
                 output_names = [i.name for i in node.outputs]
 
-                if node.type == "Placeholder":
+                if middle_inputs and node.type == "Placeholder":
                     output_names = [new_input]
                     attr["dtype"] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
-                    attr["shape"] = utils.middle_node_shape(node.name)
+
+                    attr["shape"] = output_shapes[new_input]
+                    print("attr[shape]:", output_shapes[new_input])
                     new_name = new_input[:-2]
                     print("new_name:", new_name)
                     onnx_node = helper.make_node(node.type, input_names, output_names, name=new_name, **attr)
@@ -256,7 +261,7 @@ def broadcast_op7(ctx, node, name, args):
 
 
 def const_op(ctx, node, name, args):
-    """Constants - make those initializers."""
+    """Constants - make those initializers. 权重"""
     tensor = node.get_attr("value")
     ctx.add_initializer(tensor.t)
     # we return None - const will not be in the node list. But we keep the mapping for
@@ -291,6 +296,9 @@ def placeholder_op(ctx, node, name, args):
     print("placeholder_op:", node)
     input_node = helper.make_tensor_value_info(node.output[0], node.dtype, node.shape)
     ctx.model_inputs.append(input_node)
+
+    # TODO 是每一个 OP 去计算 shape 呢？ 还是用对应的 tensorflow 的 模型 run node 的 shape 呢？
+
     return None
 
 
@@ -609,12 +617,6 @@ def relu6_op(ctx, node, name, args):
     node.type = "Max"
     shape = ctx.get_shape(node.input[0])
     zero_name = utils.make_name(node.name)
-    neg = -1
-    if neg in shape:
-        # print("------shape------:", shape)
-        shape = utils.middle_node_shape(node.name)
-
-    # print("relu6_op node.input[0] shape:", shape)
     zero_node = ctx.make_const(zero_name, "Const", np.zeros(shape, dtype=np.float32))
     six_name = utils.make_name(node.name)
     six = np.zeros(shape, dtype=np.float32)
@@ -691,21 +693,6 @@ def concat_op(ctx, node, name, args):
     node.set_attr("axis", axis[0])
     return node
 
-
-def slice_op(ctx, node, name, args):
-    print("----------------------------------slice_op-----------------------------------------")
-    # T output = Slice(T input, Index begin, Index size, @type Index)
-    # T output = Slice(T data, @INTS axes, @INTS ends, @INTS starts)
-    starts = node.inputs[1].get_tensor_value()
-    size = node.inputs[2].get_tensor_value()
-    ends = np.add(starts, size)
-    ctx.remove_input(node, node.input[2])
-    ctx.remove_input(node, node.input[1])
-    node.set_attr("starts", starts)
-    node.set_attr("ends", ends)
-    return node
-
-
 def gatherv2_op(ctx, node, name, args):
     # for GatherV2 axis come as input
     axis = node.inputs[2].get_tensor_value()
@@ -776,7 +763,7 @@ def pad_op(ctx, node, name, args):
     #print("----------------------------pad_op------------------------------")
     paddings = np.array(node.inputs[1].get_tensor_value()).transpose().flatten()
 
-    # 不符合tensorflow  and  onnx spec, 只是为了在 caffe2 能跑
+    # 不符合 tensorflow  and  onnx spec, 只是为了在 caffe2 能跑
     if not (len(paddings) == 8 and set(paddings[:2] + paddings[4:6]) == {0}):
         paddings = np.array([0, 0, paddings[1], paddings[2], 0, 0, paddings[5], paddings[6]])
 
@@ -827,6 +814,28 @@ def expanddims_op7(ctx, node, name, args):
     shape_node = ctx.make_const(shape_name, "Const", np.array(shape, dtype=np.int64))
     node.type = "Reshape"
     node.input[1] = shape_name
+    return node
+
+
+def slice_op(ctx, node, name, args):
+    print("----------------------------------slice_op-----------------------------------------")
+    # T output = Slice(T input, Index begin, Index size, @type Index)
+    # T output = Slice(T data, @INTS axes, @INTS ends, @INTS starts)
+    starts = node.inputs[1].get_tensor_value()
+    size = node.inputs[2].get_tensor_value()
+    shape = ctx.get_shape(node.input[0])
+    # 原作者 这部分没有考虑 -1 的情况 op 的属性不同 需要根据 shape 计算 for caffe2 run ,修改 size 重新计算 ends ，tensorflow 自己会算
+    new_size = []
+    for i in range(len(size)):
+        if size[i] == -1:
+            new_size.append(shape[i]-starts[i])
+        else:
+            new_size.append(size[i])
+    ends = np.add(starts, new_size)
+    ctx.remove_input(node, node.input[2])
+    ctx.remove_input(node, node.input[1])
+    node.set_attr("starts", starts)
+    node.set_attr("ends", ends)
     return node
 
 
@@ -888,7 +897,7 @@ def stridedslice_op(ctx, node, name, args):
     ctx.remove_input(node, node.input[1])
     nodes = [node]
 
-    # onnx-caffe2 caffe2 不支持多维，把多维的分成单维的实现
+    # TODO onnx-caffe2 caffe2 不支持多维，把多维的分成单维的实现
     if need_slice_twice:
         name = utils.make_name(node.name)
         slice_op = ctx.insert_new_node_on_output("Slice", node.output[0], name)
@@ -1499,6 +1508,7 @@ def tf_optimize(sess, inputs, outputs, graph_def):
         "fold_constants(ignore_errors=true)",
         "fold_batch_norms",
         "fold_old_batch_norms",
+        #"remove_control_dependencies"
 
     ]
     needed_names = [utils.node_name(i) for i in inputs] + [utils.node_name(i) for i in outputs]

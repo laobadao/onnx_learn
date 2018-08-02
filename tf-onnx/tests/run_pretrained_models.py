@@ -22,7 +22,7 @@ from tensorflow.core.framework import graph_pb2
 from tf2onnx.tfonnx import process_tf_graph
 from tensorflow.python.framework.graph_util import convert_variables_to_constants
 from PIL import Image, ImageDraw
-
+from tensorflow.python.framework import graph_util
 from object_detection.utils import ops as utils_ops
 import cv2
 # from decode import decode
@@ -31,7 +31,8 @@ from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 # from config import anchors, class_names
 from scipy import misc
-import onnx
+from tensorflow.tools.graph_transforms import TransformGraph
+from tf2onnx import utils
 
 TMPPATH = tempfile.mkdtemp()
 PERFITER = 1000
@@ -45,13 +46,10 @@ RAW_IMAGE_NP = None
 
 PREPROCESSOR_SUB = None
 
-SSD_SQUEEZE = None
-SSD_CONCAT_1 = None
 TF_SSD_BOXES = None
 TF_SSD_BOXES = None
 TF_SSD_SCORES = None
-RAW_BOX_SCORES = None
-RAW_BOX_LOCATIONS = None
+
 
 def get_beach(inputs):
     """Get beach image as input."""
@@ -128,13 +126,17 @@ def get_ssd_image(inputs):
     for name, shape in inputs.items():
         print("name:", name, "shape:", shape)
         break
+    resize_to = shape[1:3]
+    print("resize_to:", resize_to)
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "detection_3.jpg")
     image = Image.open(path)
+    image_np = load_image_into_numpy_array(image)
+    RAW_IMAGE_NP = image_np
     print("image_path:", path)
+    image = image.resize(resize_to, PIL.Image.ANTIALIAS)
     # the array based representation of the image will be used later in order to prepare the
     # result image with boxes and labels on it.
     image_np = load_image_into_numpy_array(image)
-    RAW_IMAGE_NP = image_np
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(image_np, axis=0)
     return {name: image_np_expanded}
@@ -330,14 +332,9 @@ class Test(object):
 
         elif name == "ssd_caffe2":
             print("----------------ssd_caffe2-----------  show result begin ")
-            print("ssd caffe2 result[0]:", result[0].shape)
-            print("ssd caffe2 result[1]:", result[1].shape)
 
-            result_0_diff = RAW_BOX_LOCATIONS - result[1]
-            result_1_diff = RAW_BOX_SCORES - result[0]
-            #
-            print("result_0_diff:\n", result_0_diff)
-            print("result_1_diff:\n", result_1_diff)
+            for caffe2_result in result:
+                print("caffe2_result:", caffe2_result.shape)
 
         else:
             print(name, "result[0].shape :", result[0].shape)
@@ -470,55 +467,39 @@ class Test(object):
 
         self.show_result(result, "ssd")
 
-        # print("result:", result)
-        # 'Squeeze': [1, 1917, 4],
-        # 'concat_1': [1, 1917, 91],
-
         for name, shape in self.middle_input_names.items():
             print("middle input name:", name, "shape:", shape)
             break
 
         middle_tensor_name = name
+        middle_output_dict = {}
 
-        # 'Postprocessor/raw_box_scores:0'
-        raw_box_scores_name = self.middle_output_names[0]
-        raw_box_locations_name = self.middle_output_names[1]
+        for m_output_name in self.middle_output_names:
+            output_tensor = tf.get_default_graph().get_tensor_by_name(m_output_name)
+            middle_output_dict[m_output_name[:-2]] = output_tensor
+            print("output_tensor:", output_tensor)
 
         preprocessor_tensor = tf.get_default_graph().get_tensor_by_name(middle_tensor_name)
-        raw_box_scores_tensor = tf.get_default_graph().get_tensor_by_name(raw_box_scores_name)
-        raw_box_locations_tensor = tf.get_default_graph().get_tensor_by_name(raw_box_locations_name)
-
         print("preprocessor_tensor:", preprocessor_tensor)
-        print("raw_box_scores_tensor:", raw_box_scores_tensor)
-        print("raw_box_locations_tensor:", raw_box_locations_tensor)
-
         sess.run(tf.global_variables_initializer())
-
         global PREPROCESSOR_SUB
-        global SSD_SQUEEZE
-        global SSD_CONCAT_1
-        global RAW_BOX_SCORES
-        global RAW_BOX_LOCATIONS
 
-        middle_output = sess.run(middle_tensor_name, feed_dict={image_tensor: image_value})
-        raw_box_scores_output = sess.run(raw_box_scores_name, feed_dict={image_tensor: image_value})
-        raw_box_locations_output = sess.run(raw_box_locations_name, feed_dict={image_tensor: image_value})
+        middle_input = sess.run(middle_tensor_name, feed_dict={image_tensor: image_value})
+        PREPROCESSOR_SUB = middle_input
+        print("middle_input", middle_input.shape)
 
-        PREPROCESSOR_SUB = middle_output
-        print("middle_input", middle_output.shape)
-        print("raw_box_locations_output", raw_box_locations_output.shape)
-        print("raw_box_scores_output", raw_box_scores_output.shape)
+        results_out = sess.run(middle_output_dict, feed_dict={image_tensor: image_value})
+        print("middle_output_dict:", middle_output_dict)
 
-        RAW_BOX_LOCATIONS = raw_box_locations_output
-        RAW_BOX_SCORES = raw_box_scores_output
-
+        results = []
+        for name_out, data in results_out.items():
+            print("name_out:", name_out, "---data:", data.shape)
+            results.append(data)
+        print("len(results):", len(results))
         print("run tensorflow  ssd done ")
+        return results
 
-        result = raw_box_scores_output, raw_box_locations_output
-
-        return result
-
-    def run_tf_ssd_post(self, g , inputs):
+    def run_tf_ssd_post(self, g, inputs):
 
         for name, data in inputs.items():
             print("run_tf_ssd_post name:", name, "---data----:", data.shape)
@@ -542,38 +523,41 @@ class Test(object):
             image_tensor = tf.get_default_graph().get_tensor_by_name(image_tensor_name)
 
             stack_1_tensor = tf.get_default_graph().get_tensor_by_name(stack_1_name)
+
+            # TODO 优化 使用 字典循环创建 feed_dict
+
             raw_box_scores_tensor = tf.get_default_graph().get_tensor_by_name(raw_box_scores_name)
             raw_box_locations_tensor = tf.get_default_graph().get_tensor_by_name(raw_box_locations_name)
             print("stack_1_tensor:", stack_1_tensor)
 
-            sess.run(tf.global_variables_initializer())
-
-            stack_1_result = sess.run(stack_1_tensor, feed_dict={image_tensor:inputs[name]})
-            print("stack_1_result:", stack_1_result.shape)
-
-            feed_dict = {stack_1_tensor: stack_1_result, raw_box_scores_tensor: RAW_BOX_SCORES, raw_box_locations_tensor: RAW_BOX_LOCATIONS}
-
-            result = sess.run(tensor_dict, feed_dict=feed_dict)
-
-            # print("TF_SSD_BOXES:", TF_SSD_BOXES)
-            # print("TF_SSD_SCORES:", TF_SSD_SCORES)
-            # print("result['detection_boxes'][0]:", result['detection_boxes'][0])
-            # print("result['detection_scores'][0]:", result['detection_scores'][0])
+            # sess.run(tf.global_variables_initializer())
             #
-            # print("TF_SSD_BOXES sub\n:", TF_SSD_BOXES - result['detection_boxes'][0])
-            # print("TF_SSD_SCORES sub\n:", TF_SSD_SCORES - result['detection_scores'][0])
+            # stack_1_result = sess.run(stack_1_tensor, feed_dict={image_tensor:inputs[name]})
+            # print("stack_1_result:", stack_1_result.shape)
+            #
+            # feed_dict = {stack_1_tensor: stack_1_result, raw_box_scores_tensor: RAW_BOX_SCORES, raw_box_locations_tensor: RAW_BOX_LOCATIONS}
+            #
+            # result = sess.run(tensor_dict, feed_dict=feed_dict)
+            #
+            # # print("TF_SSD_BOXES:", TF_SSD_BOXES)
+            # # print("TF_SSD_SCORES:", TF_SSD_SCORES)
+            # # print("result['detection_boxes'][0]:", result['detection_boxes'][0])
+            # # print("result['detection_scores'][0]:", result['detection_scores'][0])
+            # #
+            # # print("TF_SSD_BOXES sub\n:", TF_SSD_BOXES - result['detection_boxes'][0])
+            # # print("TF_SSD_SCORES sub\n:", TF_SSD_SCORES - result['detection_scores'][0])
+            #
+            # result['num_detections'] = int(result['num_detections'][0])
+            # result['detection_classes'] = result[
+            #     'detection_classes'][0].astype(np.uint8)
+            # result['detection_boxes'] = result['detection_boxes'][0]
+            # result['detection_scores'] = result['detection_scores'][0]
+            # if 'detection_masks' in result:
+            #     result['detection_masks'] = result['detection_masks'][0]
+            #
+            # self.show_result(result, "ssd_tf_caffe2_post")
 
-            result['num_detections'] = int(result['num_detections'][0])
-            result['detection_classes'] = result[
-                'detection_classes'][0].astype(np.uint8)
-            result['detection_boxes'] = result['detection_boxes'][0]
-            result['detection_scores'] = result['detection_scores'][0]
-            if 'detection_masks' in result:
-                result['detection_masks'] = result['detection_masks'][0]
 
-            self.show_result(result, "ssd_tf_caffe2_post")
-
-        return result
 
     @staticmethod
     def to_onnx(tf_graph, opset=None, shape_override=None, middle_input_names=None):
@@ -683,6 +667,101 @@ class Test(object):
             f.write(model_proto.SerializeToString())
         print("\tcreated", model_path)
 
+    # todo 优化
+    def set_shape_to_graph(self, inputs, model_path):
+        """ set node output shape if need """
+        print("-----------------------set_shape_to_graph------------begin-------------")
+
+        detection_graph = tf.Graph()
+        with detection_graph.as_default():
+            graph_def1 = graph_pb2.GraphDef()
+            with open(model_path, "rb") as f:
+                graph_def1.ParseFromString(f.read())
+                graph_def1 = tf2onnx.tfonnx.tf_optimize(None, inputs, self.middle_output_names, graph_def1)
+                tf.import_graph_def(graph_def1, name='')
+
+        for input_name, image_value in inputs.items():
+            print("input_name:", input_name, "data.shape:", image_value.shape)
+
+        outputs_shape = {}
+        new_output_graph = None
+        with detection_graph.as_default():
+
+            image_tensor = detection_graph.get_tensor_by_name(input_name)
+            print("image_tensor before:", image_tensor.shape.as_list())
+            need_set_shape = False
+
+            INVALID_SHAPE = {None, -1}
+            for item in image_tensor.shape.as_list():
+                print("type(item):", type(item))
+                if item in INVALID_SHAPE:
+                    print("need set shape item:", item)
+                    need_set_shape = True
+                    break
+            if need_set_shape:
+                ops1 = detection_graph.get_operations()
+                print("len(ops1) before:", len(ops1))
+                #
+                # for node in ops1:
+                #     print("node:", node.type)
+
+                i = 0
+                while i < len(ops1):
+
+                    if "Preprocessor" in ops1[i].name:
+                        ops1.pop(i)
+                        i -= 1
+                    elif "Assert" in ops1[i].name:
+                        print("Assert", ops1[i].name)
+                        ops1.pop(i)
+                        i -= 1
+                    elif ops1[i].name == "ToFloat":
+                        ops1.pop(i)
+                        i -= 1
+                    i += 1
+
+                print("len(ops1) after:", len(ops1))
+
+                tensor_names = {op.name for op in ops1 for out in op.outputs}
+                tensor_dict = {}
+                print("len(tensor_names):", len(tensor_names))
+                with tf.Session(graph=detection_graph) as sess1:
+                    sess1.run(tf.global_variables_initializer())
+                    for tensor_name in tensor_names:
+                        output_tensor = detection_graph.get_tensor_by_name(tensor_name+":0")
+                        tensor_dict[tensor_name] = output_tensor
+
+                    middle_output = sess1.run(tensor_dict, feed_dict={image_tensor: image_value})
+
+                    print("middle_output:", len(middle_output))
+
+                    for k, v in middle_output.items():
+                        outputs_shape[k+":0"] = list(v.shape)
+
+                    for tensor_name, output_tensor in tensor_dict.items():
+                        new_shape = outputs_shape[tensor_name+":0"]
+                        output_tensor.set_shape(new_shape)
+
+                    # TODO OP attr shape  modify
+                    # placeholder = detection_graph.get_operation_by_name(input_name[:-2])
+                    # print("---placeholder:\n", placeholder)
+                    # old_shape = placeholder.get_attr("shape")
+                    # print("old_shape:", type(old_shape))
+                    #
+                    # dim = old_shape.dim
+                    # print("dim:", dim)
+
+        # new_output_graph_name = "sub_" + model_path.split("/")[-1]  # PB模型保存路径
+        # print("new sub new_output_graph_name:", new_output_graph_name)
+        # pos = model_path.rfind("/")
+        # print("model_path[:pos]:", model_path[:pos])
+        # new_output_graph_dir = model_path[:pos]
+        # tf.train.write_graph(detection_graph, new_output_graph_dir, new_output_graph_name, as_text=False)
+
+        print("len(outputs_shape):", len(outputs_shape))
+        print("-----------------------set_shape_to_graph------------done-------------")
+        return detection_graph
+
     def run_test(self, name, backend="caffe2", debug=False, onnx_file=None, opset=None, perf=None):
         """Run complete test against backend."""
         print("run_test name :", name)
@@ -719,6 +798,7 @@ class Test(object):
         if self.more_inputs:
             for k, v in self.more_inputs.items():
                 inputs[k] = v
+
         tf.reset_default_graph()
         graph_def = graph_pb2.GraphDef()
         print("model_path:", model_path)
@@ -728,8 +808,10 @@ class Test(object):
         graph_def = tf2onnx.tfonnx.tf_optimize(None, inputs, self.output_names, graph_def)
         shape_override = {}
         g = tf.import_graph_def(graph_def, name='')
+        print("g:", g)
 
         with tf.Session(graph=g) as sess:
+
             # fix inputs if needed
             for k in inputs.keys():
                 t = sess.graph.get_tensor_by_name(k)
@@ -753,57 +835,34 @@ class Test(object):
                 #  重新构造ssd-onnx 所需要的 graph
                 if name == "ssd_mobile":
                     pass
+                    # TODO 根据模型 tensor 判断 是否需要 set_shape
+                    new_graph = self.set_shape_to_graph(inputs, model_path)
+
+                    input_names = []
+                    for name1, shape in self.middle_input_names.items():
+                        input_names.append(name1)
+                        print("input_name_list:", input_names)
+
+                    onnx_graph = self.to_onnx(new_graph, opset=opset, shape_override=shape_override,
+                                              middle_input_names=input_names)
+
+                    print("onnx_graph:", onnx_graph)
+                    print("\t  ------ssd onnx_graph------", "OK")
                 else:
                     onnx_graph = self.to_onnx(sess.graph, opset=opset, shape_override=shape_override)
                     print("\t  onnx_graph", "OK")
                 if debug:
                     onnx_graph.dump_graph()
                 if onnx_file:
-                    if name == "ssd_mobile":
-                        pass
-                    else:
-                        self.create_onnx_file(name, onnx_graph, inputs, onnx_file)
-                        print("\t  create_onnx_file", "OK")
+                    self.create_onnx_file(name, onnx_graph, inputs, onnx_file)
+                    print("\t  create_onnx_file", "OK")
             except Exception as ex:
                 print("\tto_onnx", "FAIL", ex)
-
-
-        # todo
-        if self.middle_output_names:
-            tf.reset_default_graph()
-            graph_def1 = graph_pb2.GraphDef()
-            with open(model_path, "rb") as f:
-                graph_def1.ParseFromString(f.read())
-            graph_def1 = tf2onnx.tfonnx.tf_optimize(None, inputs, self.middle_output_names, graph_def1)
-            g1 = tf.import_graph_def(graph_def1, name='')
-
-            with tf.Session(graph=g1) as sess1:
-
-                print("---------------sess begin---------------------")
-                try:
-                    #  重新构造ssd-onnx 所需要的 graph
-                    print("------ssd sess.graph------:", sess1.graph)
-                    input_names = []
-                    for name1, shape in self.middle_input_names.items():
-                        input_names.append(name1)
-                        print("input_name_list:", input_names)
-
-                    onnx_graph = self.to_onnx(sess1.graph, opset=opset, shape_override=shape_override, middle_input_names=input_names)
-
-                    print("onnx_graph:", onnx_graph)
-                    print("\t  ------ssd onnx_graph------", "OK")
-                    if debug:
-                        onnx_graph.dump_graph()
-                    if onnx_file:
-                        self.create_onnx_file(name, onnx_graph, inputs, onnx_file)
-                        print("\t ------ssd create_onnx_file------", "OK")
-                except Exception as ex:
-                    print("\t ------ssd to_onnx------", "FAIL", ex)
-
 
         try:
             onnx_results = None
             if backend == "caffe2":
+                pass
                 onnx_results = self.run_caffe2(name, onnx_graph, inputs)
 
                 if name == "ssd_mobile":
@@ -837,6 +896,8 @@ class Test(object):
                         np.testing.assert_array_equal(tf_results[i].shape, onnx_results[i].shape)
                 else:
                     for i in range(len(tf_results)):
+                        if i == 0:
+                            print("diff_result:",tf_results[i]-onnx_results[i])
                         np.testing.assert_allclose(tf_results[i], onnx_results[i], rtol=self.rtol, atol=self.atol)
                 print("\tResults: OK")
                 return True
