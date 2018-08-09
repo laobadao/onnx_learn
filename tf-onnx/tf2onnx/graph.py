@@ -427,7 +427,7 @@ class Graph(object):
             val = helper.make_tensor_value_info(initializer.name, initializer.data_type, initializer.dims)
             input_with_initializers.append(val)
         input_with_initializers.extend(self.model_inputs)
-
+        print(" create model proto")
         # create model proto
         graph = helper.make_graph(ops, "tf2onnx",
                                   input_with_initializers,
@@ -446,10 +446,12 @@ class Graph(object):
         kwargs["opset_imports"] = opsets
 
         model_proto = helper.make_model(graph, **kwargs)
-
+        print(" optimize the model proto begin")
         # optimize the model proto
         if optimize:
             model_proto = optimizer.optimize(model_proto)
+
+        print(" optimize the model proto  done ")
         return model_proto
 
     def dump_graph(self):

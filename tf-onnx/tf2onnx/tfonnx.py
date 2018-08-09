@@ -47,7 +47,9 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
     ignored_attr = ["unknown_rank", "_class", "Tidx", "Tshape", "use_cudnn_on_gpu", "Index",
                     "Tpaddings", "TI", "Tparams", "Tindices", "Tlen", "Tdim", "dynamic_size", "element_shape",
                     "Tmultiples", "output_dtype", "Tblock_shape", "Tcrops", "index_type", "Taxis", "U",
-                    "maxval", "Tout"]
+                    "maxval", "Tout", "extrapolation_value", "method"]
+    unspport_op = ["Assert", "Enter", "GreaterEqual", 'LogicalAnd']
+
     # some stats
     op_cnt = collections.Counter()
     attr_cnt = collections.Counter()
@@ -65,25 +67,53 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
     # TODO 优化 删除 预处理部分
     if middle_inputs:
         new_input = middle_inputs[0]
-        print("new_input:", new_input)
-        i = 0
-        while i < len(ops):
-            if "Preprocessor" in ops[i].name:
-                ops.pop(i)
-                i -= 1
-            elif "Assert" in ops[i].name:
-                print("Assert", ops[i].name)
-                ops.pop(i)
-                i -= 1
-            elif ops[i].name == "ToFloat":
-                ops.pop(i)
-                i -= 1
-            i += 1
+        # TODO 删除不需要的 ops 优化
+        ops = delete_ops(ops)
+
+        if "CropAndResize:0" in middle_inputs:
+            delete_part2 = {"FirstStageFeatureExtractor", "FirstStageBoxPredictor", "image_tensor", "range",
+                            "ClipToWindow", "ExpandDims", 'Tile', 'mul', 'Squeeze', 'Conv/', 'zeros_like', 'ones',
+                            'strided_slice_13/stack', 'strided_slice_11/stack', 'strided_slice_9/stack',
+                            'strided_slice_8/stack', 'strided_slice_6/stack', 'strided_slice_5/stack',
+                            'strided_slice_4/stack', 'strided_slice_3/stack', 'strided_slice_2/stack', 'strided_slice_1/stack',
+                            'strided_slice_12', 'strided_slice_10'}
+
+            deleted_op2 = ["Reshape", 'Reshape_1', 'Reshape_2', 'Reshape_3', 'Reshape_4', 'Reshape_5', 'Reshape_6',
+                           "ExpandDims", 'ExpandDims_1', 'ExpandDims_2', 'ExpandDims_3', 'ExpandDims_4', 'ExpandDims_5',
+                           'ExpandDims_6', 'Shape', "Shape_1", "Shape_2", "Shape_3", "Shape_4", "Shape_5", "Shape_6",
+                           "Shape_7", 'stack', 'ToFloat_4', 'ToFloat_5', 'stack_2', 'Tile_2/multiples',
+                           "strided_slice_0", "strided_slice_1", "strided_slice_2", "strided_slice_3",
+                           "strided_slice_4", 'CropAndResize/crop_size', 'stack_1', 'stack_1/3', 'stack_1/2',
+                           "strided_slice_5", "strided_slice_6", "stack_3/1", "strided_slice_13/stack_2",
+                           "strided_slice_8", "strided_slice_9", "strided_slice_10", "strided_slice_11",
+                           "strided_slice_13", "strided_slice_14", "strided_slice_15", "strided_slice_15/stack_2",
+                           "strided_slice_15/stack_1", "strided_slice_15/stack", "strided_slice_14/stack_2",
+                           "strided_slice_14/stack_1", "strided_slice_14/stack", 'strided_slice/stack_2', 'strided_slice/stack_1',
+                           'strided_slice/stack', 'strided_slice', 'Reshape/shape', 'Reshape_1/shape', 'stack/0', 'stack/1',
+                           'stack_3', 'Softmax', 'Slice', 'concat', 'init', 'Reshape_6/shape', 'concat/axis', 'concat/values_0',
+                           ]
+
+            i = 0
+            while i < len(ops):
+
+                if ops[i].name in deleted_op2:
+                    ops.pop(i)
+                    i -= 1
+
+                for item in delete_part2:
+                    if item in ops[i].name:
+                        # print(item, "---", ops[i].name)
+                        ops.pop(i)
+                        i -= 1
+                i += 1
 
     print("-------2---------- final len(ops):", len(ops))
 
     # create dict with output to shape mappings
     for node in ops:
+
+        print("---", node.name)
+
         for out in node.outputs:
             shape = shape_override.get(out.name)
             if shape is None:
@@ -96,15 +126,21 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
                 print("node.type:", node.type)
                 print(node.name, new_input, "------shape------:", shape)
                 dtypes[new_input] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
-                #output_shapes[new_input] = utils.middle_node_shape(node.name)
                 output_shapes[new_input] = shape
                 output_shapes[out.name] = shape
+            elif node.type == "CropAndResize":
+                print("node.type:", node.type)
+                print(node.name, new_input, "------shape------:", shape)
+                dtypes[new_input] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
+                output_shapes[new_input] = shape
+                output_shapes[out.name] = shape
+            elif node.type == "Range":
+                print("-----Range:", node.name)
             else:
                 dtypes[out.name] = utils.map_tf_dtype(out.dtype)
-                #print(node.name, "------shape------:", shape)
                 output_shapes[out.name] = shape
 
-                # minimal conversion of attributes
+    # minimal conversion of attributes
     for node in ops:
         attr = {}
         takeit = True
@@ -144,24 +180,60 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
                 output_names = [i.name for i in node.outputs]
 
                 if middle_inputs and node.type == "Placeholder":
-                    output_names = [new_input]
                     attr["dtype"] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
-
                     attr["shape"] = output_shapes[new_input]
-                    print("attr[shape]:", output_shapes[new_input])
+                    print("attr before:", attr)
+                    output_names = [new_input]
+                    print("output_names:", output_names)
                     new_name = new_input[:-2]
                     print("new_name:", new_name)
+                    print("attr after:", attr)
                     onnx_node = helper.make_node(node.type, input_names, output_names, name=new_name, **attr)
-
+                elif middle_inputs and node.type == "CropAndResize":
+                    attr["dtype"] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
+                    attr["shape"] = output_shapes[new_input]
+                    print("attr before:", attr)
+                    output_names = [new_input]
+                    print("output_names:", output_names)
+                    new_name = new_input[:-2]
+                    print("new_name:", new_name)
+                    print("attr after:", attr)
+                    new_type = "Placeholder"
+                    onnx_node = helper.make_node(new_type, input_names, output_names, name=new_name, **attr)
                 else:
+                    # print("else node:", node.name)
                     onnx_node = helper.make_node(node.type, input_names, output_names, name=node.name, **attr)
 
                 onnx_nodes.append(onnx_node)
             except Exception as ex:
-                log.error("pass1 convert failed for %s, ex=%s", node, ex)
+                log.error("pass 1 convert failed for %s, ex=%s", node, ex)
                 raise
 
     return onnx_nodes, op_cnt, attr_cnt, output_shapes, dtypes
+
+
+# TODO 删除不需要的 ops 优化
+def delete_ops(ops):
+    deleted_op = ["FirstStageFeatureExtractor/strided_slice", "FirstStageFeatureExtractor/strided_slice_1",
+                  "FirstStageFeatureExtractor/Shape", "FirstStageFeatureExtractor/Shape_1", "ToFloat", "ToFloat_3"]
+
+    delete_part = {"Preprocessor", "MultiClassNonMaxSuppression", "make_anchors_forRPN", "Assert", "Enter",
+                   "LogicalAnd", "GreaterEqual", "map", 'map_1', "GridAnchorGenerator", "Decode", "Postprocessor"}
+
+    i = 0
+    while i < len(ops):
+
+        if ops[i].name in deleted_op:
+            ops.pop(i)
+            i -= 1
+
+        for item in delete_part:
+            if item in ops[i].name:
+                ops.pop(i)
+                i -= 1
+        i += 1
+
+    return ops
 
 
 def _convert_shapenode_to_int64(ctx, node, input_number):
@@ -294,11 +366,11 @@ def reduce_op(ctx, node, name, args):
 def placeholder_op(ctx, node, name, args):
     print("------placeholder_op-----method----")
     print("placeholder_op:", node)
+    print("node.output[0]:", node.output[0])
+    print("node.dtype:", node.dtype)
+    print("node.shape:", node.shape)
     input_node = helper.make_tensor_value_info(node.output[0], node.dtype, node.shape)
     ctx.model_inputs.append(input_node)
-
-    # TODO 是每一个 OP 去计算 shape 呢？ 还是用对应的 tensorflow 的 模型 run node 的 shape 呢？
-
     return None
 
 
@@ -631,6 +703,13 @@ def relu6_op(ctx, node, name, args):
     return [node, new_op]
 
 
+def new_relu6_op(ctx, node, name, args):
+    node.type = "Relu6"
+    # print("new_relu6_op:", node)
+
+    return node
+
+
 def squareddifference_op(ctx, node, name, args):
     node.type = "Sub"
     op_name = utils.make_name(node.name)
@@ -692,6 +771,7 @@ def concat_op(ctx, node, name, args):
     ctx.remove_input(node, node.input[-1])
     node.set_attr("axis", axis[0])
     return node
+
 
 def gatherv2_op(ctx, node, name, args):
     # for GatherV2 axis come as input
@@ -755,12 +835,11 @@ def splitv_op(ctx, node, name, args):
 
 
 def pad_op(ctx, node, name, args):
-
     # T output = Pad(T input, int32 paddings, @type Tpaddings), CONST model using default value
     #  or PadV2(T input, int32 paddings, T constant_value, @type Tpaddings), CONST mode - default value specified
     #  or MirrorPad(T input, int32 paddings, @type Tpaddings, @STRING mode), other mode.
     # T output = Pad(T data, @STRING mode, @INTS pads, @FLOAT value)
-    #print("----------------------------pad_op------------------------------")
+    # print("----------------------------pad_op------------------------------")
     paddings = np.array(node.inputs[1].get_tensor_value()).transpose().flatten()
 
     # 不符合 tensorflow  and  onnx spec, 只是为了在 caffe2 能跑
@@ -768,7 +847,7 @@ def pad_op(ctx, node, name, args):
         paddings = np.array([0, 0, paddings[1], paddings[2], 0, 0, paddings[5], paddings[6]])
 
     mode = node.get_attr("mode")
-    #print("mode:", mode)
+    # print("mode:", mode)
     if mode:
         mode = mode.s.decode("utf-8").lower()
         node.set_attr("mode", mode)
@@ -818,7 +897,6 @@ def expanddims_op7(ctx, node, name, args):
 
 
 def slice_op(ctx, node, name, args):
-    print("----------------------------------slice_op-----------------------------------------")
     # T output = Slice(T input, Index begin, Index size, @type Index)
     # T output = Slice(T data, @INTS axes, @INTS ends, @INTS starts)
     starts = node.inputs[1].get_tensor_value()
@@ -828,7 +906,7 @@ def slice_op(ctx, node, name, args):
     new_size = []
     for i in range(len(size)):
         if size[i] == -1:
-            new_size.append(shape[i]-starts[i])
+            new_size.append(shape[i] - starts[i])
         else:
             new_size.append(size[i])
     ends = np.add(starts, new_size)
@@ -840,7 +918,6 @@ def slice_op(ctx, node, name, args):
 
 
 def stridedslice_op(ctx, node, name, args):
-    print("----------------------------------stridedslice_op-----------------------------------------")
     # for now we implement common cases. Things like strides!=1 are not mappable to onnx.
     not_supported_attr = ["ellipsis_mask", "new_axis_mask"]
     for attr_name in not_supported_attr:
@@ -1498,6 +1575,8 @@ def tensorflow_onnx_mapping(g, continue_on_error, custom_op_handlers):
                 onnx_nodes.append(onnx_node)
 
     g.set_nodes(onnx_nodes)
+
+    print("tensorflow_onnx_mapping...... done")
     return mapped_op, unmapped_op
 
 
@@ -1508,7 +1587,7 @@ def tf_optimize(sess, inputs, outputs, graph_def):
         "fold_constants(ignore_errors=true)",
         "fold_batch_norms",
         "fold_old_batch_norms",
-        #"remove_control_dependencies"
+        "sort_by_execution_order",
 
     ]
     needed_names = [utils.node_name(i) for i in inputs] + [utils.node_name(i) for i in outputs]

@@ -136,11 +136,19 @@ def get_ssd_image(inputs):
     image = image.resize(resize_to, PIL.Image.ANTIALIAS)
     # the array based representation of the image will be used later in order to prepare the
     # result image with boxes and labels on it.
-    image_np = load_image_into_numpy_array(image)
+    image_np = np.array(image.getdata()).reshape(shape).astype(np.uint8)
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-    image_np_expanded = np.expand_dims(image_np, axis=0)
-    return {name: image_np_expanded}
+    print("image_np_expanded:", image_np.shape)
+    return {name: image_np}
 
+def get_faster_rcnn_resnet101(inputs):
+    for name, shape in inputs.items():
+        print("name:", name, "shape:", shape)
+        break
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "detection_3.jpg")
+    image = Image.open(path)
+    image_np = load_image_into_numpy_array(image)
+    return {name: image_np}
 
 def get_random(inputs):
     """Get random input."""
@@ -205,6 +213,7 @@ _INPUT_FUNC_MAPPING = {
     "get_detection": get_detection,
     "get_detection_raw": get_detection_raw,
     "get_ssd_image": get_ssd_image,
+    "get_faster_rcnn_resnet101": get_faster_rcnn_resnet101,
 }
 
 
@@ -335,6 +344,9 @@ class Test(object):
 
             for caffe2_result in result:
                 print("caffe2_result:", caffe2_result.shape)
+        elif name == "faster_rcnn":
+            for item in result:
+                print("------result:", item.shape)
 
         else:
             print(name, "result[0].shape :", result[0].shape)
@@ -385,8 +397,11 @@ class Test(object):
             k = sess.graph.get_tensor_by_name(k)
             feed_dict[k] = v
         result = sess.run(self.output_names, feed_dict=feed_dict)
-        # print("run_tensorflow result:", result)
-        self.show_result(result, "tensorflow")
+
+        if self.middle_input_names:
+            self.show_result(result, "faster_rcnn")
+        else:
+            self.show_result(result, "tensorflow")
 
         if self.perf:
             start = time.time()
@@ -395,77 +410,35 @@ class Test(object):
             self.tf_runtime = time.time() - start
         return result
 
-    def ssd_tensorflow_pre(self, inputs):
-        for name, data in inputs.items():
-            #print("name:", name, "data:", data)
-            break
-
-        image_value = inputs[name]
-        print("image_value:", image_value.shape)
-        ops = tf.get_default_graph().get_operations()
-        print("len ops:", len(ops))
-        all_tensor_names = {output.name for op in ops for output in op.outputs}
-        print("len(all_tensor_names):", len(all_tensor_names))
-
-        tensor_dict = {}
-
-        for key in [
-            'num_detections', 'detection_boxes', 'detection_scores',
-            'detection_classes', 'detection_masks'
-        ]:
-            tensor_name = key + ':0'
-            if tensor_name in all_tensor_names:
-                tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(tensor_name)
-
-        print("tensor_dict:", len(tensor_dict))
-
-        if 'detection_masks' in tensor_dict:
-            # The following processing is only for single image
-            detection_boxes = tf.squeeze(tensor_dict['detection_boxes'], [0])
-            detection_masks = tf.squeeze(tensor_dict['detection_masks'], [0])
-            # Reframe is required to translate mask from box coordinates to image coordinates and fit the image size.
-            real_num_detection = tf.cast(tensor_dict['num_detections'][0], tf.int32)
-            detection_boxes = tf.slice(detection_boxes, [0, 0], [real_num_detection, -1])
-            detection_masks = tf.slice(detection_masks, [0, 0, 0], [real_num_detection, -1, -1])
-            detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(
-                detection_masks, detection_boxes, image_value.shape[0], image_value.shape[1])
-            detection_masks_reframed = tf.cast(
-                tf.greater(detection_masks_reframed, 0.5), tf.uint8)
-            # Follow the convention by adding back the batch dimension
-            tensor_dict['detection_masks'] = tf.expand_dims(
-                detection_masks_reframed, 0)
-
-        image_tensor = tf.get_default_graph().get_tensor_by_name(name)
-        print("image_tensor:", image_tensor)
-        print("tensor_dict:", len(tensor_dict))
-
-        return tensor_dict, image_tensor, image_value
-
     def run_tensorflow_ssd(self, sess, inputs):
         print("----" * 20)
         print('run_tensorflow_ssd(): so we have a reference output')
         """Run model on tensorflow so we have a referecne output."""
-
-        tensor_dict, image_tensor, image_value = self.ssd_tensorflow_pre(inputs)
+        feed_dict = {}
+        for k, v in inputs.items():
+            k = sess.graph.get_tensor_by_name(k)
+            feed_dict[k] = v
 
         # run inference
-        result = sess.run(tensor_dict, feed_dict={image_tensor: image_value})
+        result = sess.run(self.output_names, feed_dict=feed_dict)
 
-        global TF_SSD_BOXES
-        global TF_SSD_SCORES
+        print("raw len(result):", len(result))
 
-        TF_SSD_BOXES = result['detection_boxes'][0]
-        TF_SSD_SCORES = result['detection_scores'][0]
 
-        result['num_detections'] = int(result['num_detections'][0])
-        result['detection_classes'] = result[
-            'detection_classes'][0].astype(np.uint8)
-        result['detection_boxes'] = result['detection_boxes'][0]
-        result['detection_scores'] = result['detection_scores'][0]
-        if 'detection_masks' in result:
-            result['detection_masks'] = result['detection_masks'][0]
+        # global TF_SSD_BOXES
+        # global TF_SSD_SCORES
+        #
+        # TF_SSD_BOXES = result['detection_boxes'][0]
+        # TF_SSD_SCORES = result['detection_scores'][0]
 
-        self.show_result(result, "ssd")
+        result_final = {}
+
+        result_final['num_detections'] = int(result[2])
+        result_final['detection_classes'] = result[3].astype(np.uint8)
+        result_final['detection_boxes'] = result[0]
+        result_final['detection_scores'] = result[2]
+
+        #self.show_result(result_final, "ssd")
 
         for name, shape in self.middle_input_names.items():
             print("middle input name:", name, "shape:", shape)
@@ -484,16 +457,16 @@ class Test(object):
         sess.run(tf.global_variables_initializer())
         global PREPROCESSOR_SUB
 
-        middle_input = sess.run(middle_tensor_name, feed_dict={image_tensor: image_value})
+        middle_input = sess.run(middle_tensor_name, feed_dict=feed_dict)
         PREPROCESSOR_SUB = middle_input
         print("middle_input", middle_input.shape)
 
-        results_out = sess.run(middle_output_dict, feed_dict={image_tensor: image_value})
+        results_out = sess.run(middle_output_dict, feed_dict=feed_dict)
         print("middle_output_dict:", middle_output_dict)
 
         results = []
         for name_out, data in results_out.items():
-            print("name_out:", name_out, "---data:", data.shape)
+            print("-----tensorflow result_out shape:", name_out, "---data:", data.shape)
             results.append(data)
         print("len(results):", len(results))
         print("run tensorflow  ssd done ")
@@ -510,7 +483,10 @@ class Test(object):
             # TODO caffe2 ssd 输出结果 作为输入 用 tensorflow 进行后处理 不能传 imagetensor
             # 要传  post 需要的 4 个 inputs 其中两个为 caffe2 的输出
 
-            tensor_dict, image_tensor, image_value = self.ssd_tensorflow_pre(inputs)
+            feed_dict = {}
+            for k, v in inputs.items():
+                k = sess.graph.get_tensor_by_name(k)
+                feed_dict[k] = v
 
             # "image_tensor:0"
 
@@ -537,7 +513,8 @@ class Test(object):
             #
             # feed_dict = {stack_1_tensor: stack_1_result, raw_box_scores_tensor: RAW_BOX_SCORES, raw_box_locations_tensor: RAW_BOX_LOCATIONS}
             #
-            # result = sess.run(tensor_dict, feed_dict=feed_dict)
+            # run inference
+            #result = sess.run(self.output_names, feed_dict=feed_dict)
             #
             # # print("TF_SSD_BOXES:", TF_SSD_BOXES)
             # # print("TF_SSD_SCORES:", TF_SSD_SCORES)
@@ -655,10 +632,14 @@ class Test(object):
         return results
 
     def create_onnx_file(self, name, onnx_graph, inputs, outdir):
+        print("--------------create_onnx_file-----begin-----")
         os.makedirs(outdir, exist_ok=True)
         model_path = os.path.join(outdir, name + ".onnx")
         # 如果配置文件中 出现 middle_output 的参数 ，则模型只转换到指定的 输出 node 输出 中间节点
         if self.middle_output_names:
+            print("name:", name)
+            print("inputs.keys():", inputs.keys())
+            print("self.middle_output_names:", self.middle_output_names)
             model_proto = onnx_graph.make_model(name, inputs.keys(), self.middle_output_names)
         else:
             model_proto = onnx_graph.make_model(name, inputs.keys(), self.output_names)
@@ -677,11 +658,19 @@ class Test(object):
             graph_def1 = graph_pb2.GraphDef()
             with open(model_path, "rb") as f:
                 graph_def1.ParseFromString(f.read())
-                graph_def1 = tf2onnx.tfonnx.tf_optimize(None, inputs, self.middle_output_names, graph_def1)
+                if self.middle_output_names:
+                    graph_def1 = tf2onnx.tfonnx.tf_optimize(None, inputs, self.middle_output_names, graph_def1)
+                else:
+                    graph_def1 = tf2onnx.tfonnx.tf_optimize(None, inputs, self.output_names, graph_def1)
                 tf.import_graph_def(graph_def1, name='')
 
         for input_name, image_value in inputs.items():
             print("input_name:", input_name, "data.shape:", image_value.shape)
+
+        deleted_op = ["FirstStageFeatureExtractor/strided_slice", "FirstStageFeatureExtractor/strided_slice_1",
+                      "FirstStageFeatureExtractor/Shape", "FirstStageFeatureExtractor/Shape_1", "ToFloat", "ToFloat_3"]
+
+        unspport_op = ["Assert", "Enter", "GreaterEqual", 'LogicalAnd']
 
         outputs_shape = {}
         new_output_graph = None
@@ -699,30 +688,58 @@ class Test(object):
                     need_set_shape = True
                     break
             if need_set_shape:
-                ops1 = detection_graph.get_operations()
-                print("len(ops1) before:", len(ops1))
-                #
-                # for node in ops1:
-                #     print("node:", node.type)
+                ops = detection_graph.get_operations()
+                print("len(ops1) before:", len(ops))
 
                 i = 0
-                while i < len(ops1):
-
-                    if "Preprocessor" in ops1[i].name:
-                        ops1.pop(i)
+                while i < len(ops):
+                    if "Preprocessor" in ops[i].name:
+                        ops.pop(i)
                         i -= 1
-                    elif "Assert" in ops1[i].name:
-                        print("Assert", ops1[i].name)
-                        ops1.pop(i)
+                    elif ops[i].name in deleted_op:
+                        print("deleted_op ", ops[i].name)
+                        ops.pop(i)
                         i -= 1
-                    elif ops1[i].name == "ToFloat":
-                        ops1.pop(i)
+                    elif "MultiClassNonMaxSuppression" in ops[i].name:
+                        ops.pop(i)
+                        i -= 1
+                    elif "make_anchors_forRPN" in ops[i].name:
+                        print("make_anchors_forRPN ", ops[i].name)
+                        ops.pop(i)
+                        i -= 1
+                    elif "Assert" in ops[i].name:
+                        print("Assert ", ops[i].name)
+                        ops.pop(i)
+                        i -= 1
+                    elif "Enter" in ops[i].name:
+                        print("Enter ", ops[i].name)
+                        ops.pop(i)
+                        i -= 1
+                    elif "GreaterEqual" in ops[i].name:
+                        print("GreaterEqual ", ops[i].name)
+                        ops.pop(i)
+                        i -= 1
+                    elif "LogicalAnd" in ops[i].name:
+                        print("LogicalAnd ", ops[i].name)
+                        ops.pop(i)
+                        i -= 1
+                    elif "map" in ops[i].name:
+                        print(" map", ops[i].name)
+                        ops.pop(i)
+                        i -= 1
+                    elif "GridAnchorGenerator" in ops[i].name:
+                        print("GridAnchorGenerator", ops[i].name)
+                        ops.pop(i)
+                        i -= 1
+                    elif "Decode" in ops[i].name:
+                        print(" Decode", ops[i].name)
+                        ops.pop(i)
                         i -= 1
                     i += 1
 
-                print("len(ops1) after:", len(ops1))
+                print("len(ops1) after:", len(ops))
 
-                tensor_names = {op.name for op in ops1 for out in op.outputs}
+                tensor_names = {op.name for op in ops if op.outputs}
                 tensor_dict = {}
                 print("len(tensor_names):", len(tensor_names))
                 with tf.Session(graph=detection_graph) as sess1:
@@ -750,14 +767,6 @@ class Test(object):
                     #
                     # dim = old_shape.dim
                     # print("dim:", dim)
-
-        # new_output_graph_name = "sub_" + model_path.split("/")[-1]  # PB模型保存路径
-        # print("new sub new_output_graph_name:", new_output_graph_name)
-        # pos = model_path.rfind("/")
-        # print("model_path[:pos]:", model_path[:pos])
-        # new_output_graph_dir = model_path[:pos]
-        # tf.train.write_graph(detection_graph, new_output_graph_dir, new_output_graph_name, as_text=False)
-
         print("len(outputs_shape):", len(outputs_shape))
         print("-----------------------set_shape_to_graph------------done-------------")
         return detection_graph
@@ -824,7 +833,10 @@ class Test(object):
 
             # run the model with tensorflow
             # TODO optimize code
-            if name == "ssd_mobile":
+
+            object_detection = ["ssd_mobile", "faster_rcnn_resnet50", "faster_rcnn_resnet50_stage2"]
+
+            if name in object_detection:
                 tf_results = self.run_tensorflow_ssd(sess, inputs)
             else:
                 tf_results = self.run_tensorflow(sess, inputs)
@@ -833,8 +845,7 @@ class Test(object):
             print("\ttensorflow", "OK")
             try:
                 #  重新构造ssd-onnx 所需要的 graph
-                if name == "ssd_mobile":
-                    pass
+                if self.middle_input_names:
                     # TODO 根据模型 tensor 判断 是否需要 set_shape
                     new_graph = self.set_shape_to_graph(inputs, model_path)
 
@@ -862,23 +873,22 @@ class Test(object):
         try:
             onnx_results = None
             if backend == "caffe2":
-                pass
                 onnx_results = self.run_caffe2(name, onnx_graph, inputs)
 
-                if name == "ssd_mobile":
-                    #TODO 用 tensorflow 进行后处理 改为共同的 decode 和 NMS
-
-                    tf.reset_default_graph()
-                    graph_def = graph_pb2.GraphDef()
-                    print("model_path:", model_path)
-                    with open(model_path, "rb") as f:
-                        graph_def.ParseFromString(f.read())
-
-                    graph_def = tf2onnx.tfonnx.tf_optimize(None, inputs, self.output_names, graph_def)
-                    g = tf.import_graph_def(graph_def, name='')
-
-                    self.run_tf_ssd_post(g, inputs)
-                    print("run caffe2 post tf done")
+                # if self.middle_output_names:
+                #     #TODO 用 tensorflow 进行后处理 改为共同的 decode 和 NMS
+                #
+                #     tf.reset_default_graph()
+                #     graph_def = graph_pb2.GraphDef()
+                #     print("model_path:", model_path)
+                #     with open(model_path, "rb") as f:
+                #         graph_def.ParseFromString(f.read())
+                #
+                #     graph_def = tf2onnx.tfonnx.tf_optimize(None, inputs, self.output_names, graph_def)
+                #     g = tf.import_graph_def(graph_def, name='')
+                #
+                #     #self.run_tf_ssd_post(g, inputs)
+                #     print("run caffe2 post tf done")
 
             elif backend == "onnxmsrt":
                 onnx_results = self.run_onnxmsrt(name, onnx_graph, inputs)

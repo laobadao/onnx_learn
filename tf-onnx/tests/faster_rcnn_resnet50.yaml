@@ -1,0 +1,17 @@
+faster_rcnn_resnet50:
+  model: /data1/home/nntool/jjzhao/tensorflow-onnx/tests/models/faster_rcnn_resnet50/frozen_inference_graph.pb
+  input_get: get_ssd_image
+  inputs:
+    "image_tensor:0": [1, 600, 966, 3]
+  outputs:
+    - detection_boxes:0
+    - detection_scores:0
+    - num_detections:0
+    - detection_classes:0
+  middle_inputs:
+    "Preprocessor/sub:0": [1, 600,966, 3]
+  middle_outputs:
+    - Squeeze:0
+    - FirstStageFeatureExtractor/resnet_v1_50/resnet_v1_50/block3/unit_6/bottleneck_v1/Relu:0
+  rtol: 0.1
+  atol: 0.00001

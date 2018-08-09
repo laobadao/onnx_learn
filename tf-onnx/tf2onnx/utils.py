@@ -84,6 +84,15 @@ ONNX_VALID_ATTRIBUTES = {
 }
 
 
+UNSUPPORT_OP = {
+    'GreaterEqual', 'Assert', 'TensorArrayScatterV3', 'Enter', 'Merge', 'NextIteration', 'Exit', 'Fill',
+    'LoopCond', 'Switch', 'Greater', 'Round', 'TensorArrayWriteV3', 'TensorArrayGatherV3', 'TensorArray',
+    'TensorArrayGrad', 'TensorArrayGrad', 'TensorArraySize', 'TensorArrayClose', 'TensorArrayV2', 'TensorArrayGradV2',
+    'TensorArraySizeV2', 'TensorArrayCloseV2', 'TensorArrayV3', 'TensorArrayGradV3', 'TensorArraySizeV3', 'TensorArrayCloseV3',
+
+}
+
+
 # index for internally generated names
 INTERNAL_NAME = 1
 

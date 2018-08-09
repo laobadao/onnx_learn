@@ -1,0 +1,19 @@
+ssd_mobile:
+  model: /data1/home/nntool/jjzhao/tensorflow-onnx/tests/models/ssd_mobile/frozen_inference_graph.pb
+  input_get: get_ssd_image
+  inputs:
+    "image_tensor:0": [1, 300, 300, 3]
+  outputs:
+    - detection_boxes:0
+    - detection_scores:0
+    - num_detections:0
+    - detection_classes:0
+  middle_inputs:
+    "Preprocessor/sub:0": [1, 300, 300, 3]
+  middle_outputs:
+    - Postprocessor/Reshape_1:0
+    - Postprocessor/Reshape:0
+    - Postprocessor/Slice:0
+
+
+    

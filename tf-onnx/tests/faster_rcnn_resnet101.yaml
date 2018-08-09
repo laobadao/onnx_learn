@@ -1,0 +1,20 @@
+faster_rcnn_resnet101:
+  model: /data1/home/nntool/jjzhao/tensorflow-onnx/tests/models/faster_rcnn_resnet101/frozen_inference_graph.pb
+  input_get: get_faster_rcnn_resnet101
+  inputs:
+    "image_tensor:0": [600, 1000, 3]
+  outputs:
+    - postprocess_fastrcnn/concat:0
+    - postprocess_fastrcnn/concat_1:0
+    - postprocess_fastrcnn/concat_2:0
+  middle_inputs:
+    "Preprocessor/sub:0": [600, 1000, 3]
+  middle_outputs:
+    - Cast:0
+    - Cast_1:0
+    - build_rpn/rpn_cls_prob/Reshape_1:0
+    - build_rpn/Reshape:0
+    - Shape:0
+    - resnet_v1_101_3/block3/unit_23/bottleneck_v1/Relu:0
+  rtol: 0.1
+  atol: 0.00001
