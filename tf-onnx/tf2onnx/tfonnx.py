@@ -639,6 +639,7 @@ def depthwiseconv_op(ctx, node, name, args):
     kernel_shape = ctx.get_shape(node.input[1])
     if len(kernel_shape) != 4:
         raise ValueError("only Conv2D is supported")
+
     k_h, k_w, k_input_channels, k_channel_multiplier = kernel_shape
     k_output_channels = i_c * k_channel_multiplier
 
@@ -649,9 +650,40 @@ def depthwiseconv_op(ctx, node, name, args):
     add_padding(ctx, node, kernel_shape, strides)
 
     new_kernel_shape = [k_output_channels, 1, k_h, k_w]
+
     nodes = conv_convert_inputs(ctx, node, with_kernel=True, new_kernel_shape=new_kernel_shape)
     return nodes
 
+
+def depthwiseconv2dnative_op(ctx, node, name, args):
+    node.type = "DepthwiseConv2dNative"
+    input_shape = ctx.get_shape(node.input[0])
+    if len(input_shape) != 4:
+        raise ValueError("only Conv2D is supported")
+
+    if node.is_nhwc():
+        i_n, i_h, i_w, i_c = input_shape
+    else:
+        i_n, i_c, i_h, i_w = input_shape
+
+    kernel_shape = ctx.get_shape(node.input[1])
+    if len(kernel_shape) != 4:
+        raise ValueError("only Conv2D is supported")
+
+    k_h, k_w, k_input_channels, k_channel_multiplier = kernel_shape
+    #k_output_channels = i_c * k_channel_multiplier
+
+    node.set_attr("kernel_shape", [k_h, k_w])
+    strides = conv_dims_attr(node, "strides")
+    conv_dims_attr(node, "dilations")
+    node.set_attr("group", i_c)
+    add_padding(ctx, node, kernel_shape, strides)
+
+    #new_kernel_shape = [k_output_channels, 1, k_h, k_w]
+
+    nodes = conv_convert_inputs(ctx, node, with_kernel=True)
+
+    return nodes
 
 def pool_op(ctx, node, name, args):
     # T output = MaxPool(T input, @list(int) ksize, @list(int) strides, @string padding, @string data_format)
@@ -1284,7 +1316,7 @@ _OPSET_4 = {
     "Equal": (broadcast_op, []),
     "ExpandDims": (expanddims_op, []),
     "DepthwiseConv2d": (depthwiseconv_op, ["Conv"]),
-    "DepthwiseConv2dNative": (depthwiseconv_op, ["Conv"]),
+    "DepthwiseConv2dNative": (depthwiseconv2dnative_op, ["Conv"]),
     "Dropout": (direct_op, []),
     "Elu": (direct_op, []),
     "Exp": (direct_op, []),
@@ -1324,7 +1356,7 @@ _OPSET_4 = {
     "RealDiv": (broadcast_op, ["Div"]),
     "Reciprocal": (direct_op, []),
     "Relu": (direct_op, ["Relu"]),
-    "Relu6": (relu6_op, []),
+    "Relu6": (new_relu6_op, []),
     "Reshape": (reshape_op, ["Reshape"]),
     "Rsqrt": (rsqrt_op, []),
     "Shape": (direct_op, []),
