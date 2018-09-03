@@ -1,0 +1,6 @@
+googlenet_v1_slim:
+  model: tests/models/inceptionV1/inception_v1_2016_08_28_frozen.pb
+  inputs:
+    "input:0": [1, 224, 224, 3]
+  outputs:
+    - InceptionV1/Logits/Predictions/Softmax:0

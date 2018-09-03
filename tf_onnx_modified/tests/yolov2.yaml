@@ -1,0 +1,9 @@
+yolov2:
+  model: tests/models/yolov2_pb/frozen_yolov2.pb
+  inputs:
+    "input:0": [1, 416, 416, 3]
+  outputs:
+    - Reshape_1:0
+    # - output_bboxes:0
+    # - output_obj:0
+    # - output_class:0

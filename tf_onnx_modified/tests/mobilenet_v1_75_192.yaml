@@ -1,0 +1,6 @@
+mobilenet_v1_75_192:
+  model: tests/models/mobilenetV1_192/mobilenet_v1_0.75_192/frozen_graph.pb
+  inputs:
+    "input:0": [1, 192, 192, 3]
+  outputs:
+    - MobilenetV1/Predictions/Softmax:0

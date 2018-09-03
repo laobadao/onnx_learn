@@ -1,0 +1,7 @@
+mobilenet_v1_100_224:
+  model: tests/models/mobilenetV1_224/mobilenet_v1_1.0_224/frozen_graph.pb
+  input_get: get_beach
+  inputs:
+    "input:0": [1, 224, 224, 3]
+  outputs:
+    - MobilenetV1/Predictions/Softmax:0

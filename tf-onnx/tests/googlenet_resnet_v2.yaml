@@ -1,0 +1,8 @@
+glenet_resnet_v2:
+  model: /data1/home/nntool/jjzhao/tensorflow-onnx/tests/models/inception_resnet_v2/inception_resnet_v2_2016_08_30_frozen.pb
+  input_get: get_beach
+  inputs:
+    "input:0": [1, 299, 299, 3]
+  outputs:
+    - InceptionResnetV2/Logits/Predictions:0
+  rtol: 0.05

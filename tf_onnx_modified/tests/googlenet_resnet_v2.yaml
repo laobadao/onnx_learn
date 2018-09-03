@@ -1,0 +1,6 @@
+glenet_resnet_v2:
+  model: tests/models/inception_resnet_v2/inception_resnet_v2_2016_08_30_frozen.pb
+  inputs:
+    "input:0": [1, 299, 299, 3]
+  outputs:
+    - InceptionResnetV2/Logits/Predictions:0

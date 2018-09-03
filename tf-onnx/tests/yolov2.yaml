@@ -1,5 +1,5 @@
 yolov2:
-  model: /home/nishome/jjzhao/github/YOLOv2-Tensorflow/yolov2_pb/frozen_yolov2.pb
+  model: tests/models/yolov2_pb/frozen_yolov2.pb
   input_get: get_detection
   inputs:
     "input:0": [1, 416, 416, 3]

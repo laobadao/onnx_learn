@@ -1,0 +1,6 @@
+inception_v3_slim:
+  model: tests/models/inception_v3/inception_v3_2016_08_28_frozen.pb
+  inputs:
+    "input:0": [1, 299, 299, 3]
+  outputs:
+    - InceptionV3/Predictions/Softmax:0

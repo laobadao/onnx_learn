@@ -1,0 +1,8 @@
+resnet_v1_50:
+  model: /data1/home/nntool/jjzhao/tensorflow-onnx/tests/models/inceptionv3/frozen.pb
+  input_get: get_beach
+  inputs:
+    "input:0": [1, 299, 299, 3]
+  outputs:
+    - InceptionV3/Logits/Predictions/Softmax:0
+

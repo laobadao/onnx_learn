@@ -28,6 +28,9 @@ MANIFEST
 *.pb
 *.tar.gz
 *.weights
+log/
+*.h5
+*.hdf5
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

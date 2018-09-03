@@ -1,0 +1,19 @@
+faster_rcnn_resnet50:
+  model: tests/models/faster_rcnn_resnet50/frozen_inference_graph.pb
+  inputs:
+    "image_tensor:0": [1, 600, 966, 3]
+  outputs:
+    - detection_boxes:0
+    - detection_scores:0
+    - num_detections:0
+    - detection_classes:0
+  middle_inputs:
+    "Preprocessor/sub:0": [1, 600,966, 3]
+  force_input_shape: True    
+  middle_outputs:
+    - FirstStageBoxPredictor/BoxEncodingPredictor/BiasAdd:0
+    - FirstStageBoxPredictor/ClassPredictor/BiasAdd:0
+    - Conv/Relu6:0
+    - FirstStageFeatureExtractor/resnet_v1_50/resnet_v1_50/block3/unit_6/bottleneck_v1/Relu:0
+
+

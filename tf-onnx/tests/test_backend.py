@@ -1059,6 +1059,7 @@ class Tf2OnnxBackendTests(unittest.TestCase):
         x_shape = [1, 15, 20, 2]
         x_new_size = [30, 40]
         x_val = np.arange(1, 1 + np.prod(x_shape)).astype("float32").reshape(x_shape)
+        print("x_val:", x_val)
         x = tf.placeholder(tf.float32, x_shape, name=_TFINPUT)
         x_new_size_ = tf.constant(x_new_size)
         x_ = tf.image.resize_bilinear(x, x_new_size_)

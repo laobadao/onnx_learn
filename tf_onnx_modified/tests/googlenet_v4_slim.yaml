@@ -1,0 +1,6 @@
+googlenet_v4_slim:
+  model: tests/models/inceptionV4/inception_v4_2016_09_09_frozen.pb
+  inputs:
+    "input:0": [1, 299, 299, 3]
+  outputs:
+    - InceptionV4/Logits/Predictions:0

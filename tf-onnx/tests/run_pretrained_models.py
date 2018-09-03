@@ -58,16 +58,20 @@ def get_beach(inputs):
         break
     resize_to = shape[1:3]
     print("resize_to:", resize_to)
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dog.jpg")
-    print("path:", path)
-    img = PIL.Image.open(path)
-    img = img.resize(resize_to, PIL.Image.ANTIALIAS)
-    img_np = np.array(img).astype(np.float32)
-    img_np = img_np.reshape(shape)
+    # path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "elephant.jpg")
+    # print("path:", path)
+    # img = PIL.Image.open(path)
+    # img = img.resize(resize_to, PIL.Image.ANTIALIAS)
+    # img_np = np.array(img).astype(np.float32)
+    # img_np = img_np.reshape(shape)
     # print("img_np:",img_np)
     # vgg16 不需要对图像做处理 其他的需要 
-    img_np = img_np / 127.5 - 1
+    # img_np = img_np / 127.5 - 1
+
+    img_np = np.ones(shape=(1, 224, 224, 3), dtype=np.float32)
+    print("ones img_np:", img_np.shape)
     return {name: img_np}
+
 
 
 def get_detection(inputs):
@@ -356,8 +360,14 @@ class Test(object):
                 print(name, " result[0].shape:", result[0].shape)
                 index = np.argmax(result[0], axis=1)
                 print(name, " index:", index)
-            # resnet v1 50 的版本需要 这样去检测 index 它的 shape 维数比较多 1000 类
 
+            if result[0].shape == (1, 1000):
+                print(name, " result:", result)
+                print(name, " result[0].shape:", result[0].shape)
+                index = np.argmax(result[0], axis=1)
+                print(name, " index:", index)
+
+            # resnet v1 50 的版本需要 这样去检测 index 它的 shape 维数比较多 1000 类
             if result[0].shape == (1, 1, 1, 1001) or result[0].shape == (1, 1, 1, 1000):
                 print(name, " result.shape:", result[0][0][0].shape)
                 index = np.argmax(result[0][0][0], axis=1)
@@ -396,6 +406,7 @@ class Test(object):
         for k, v in inputs.items():
             k = sess.graph.get_tensor_by_name(k)
             feed_dict[k] = v
+        print("self.output_names:", self.output_names)
         result = sess.run(self.output_names, feed_dict=feed_dict)
 
         if self.middle_input_names:
@@ -452,6 +463,7 @@ class Test(object):
             middle_output_dict[m_output_name[:-2]] = output_tensor
             print("output_tensor:", output_tensor)
 
+
         preprocessor_tensor = tf.get_default_graph().get_tensor_by_name(middle_tensor_name)
         print("preprocessor_tensor:", preprocessor_tensor)
         sess.run(tf.global_variables_initializer())
@@ -464,10 +476,22 @@ class Test(object):
         results_out = sess.run(middle_output_dict, feed_dict=feed_dict)
         print("middle_output_dict:", middle_output_dict)
 
+        import h5py
+        f = h5py.File('outputs_all.h5', 'w')
+
         results = []
         for name_out, data in results_out.items():
             print("-----tensorflow result_out shape:", name_out, "---data:", data.shape)
             results.append(data)
+
+            print(name_out.replace("/", "_"))
+            f.create_dataset(name_out.replace("/", "_"), data=data)
+
+        f.close()
+
+
+
+
         print("len(results):", len(results))
         print("run tensorflow  ssd done ")
         return results
@@ -553,7 +577,7 @@ class Test(object):
         else:
             model_proto = onnx_graph.make_model("test", inputs.keys(), self.output_names)
 
-        prepared_backend, ws = caffe2.python.onnx.backend.prepare(model_proto)
+        prepared_backend = caffe2.python.onnx.backend.prepare(model_proto)
 
         if self.middle_input_names:
             for name, shape in self.middle_input_names.items():
@@ -752,12 +776,25 @@ class Test(object):
 
                     print("middle_output:", len(middle_output))
 
+                    import h5py
+                    f1 = h5py.File('outputs_all_new.h5', 'w')
+
                     for k, v in middle_output.items():
                         outputs_shape[k+":0"] = list(v.shape)
+
+                        print(k.replace("/", "_"))
+                        f1.create_dataset(k.replace("/", "_"), data=v)
+                    f1.close()
+
+
+                    f = open("shapes_new.txt", "w")
 
                     for tensor_name, output_tensor in tensor_dict.items():
                         new_shape = outputs_shape[tensor_name+":0"]
                         output_tensor.set_shape(new_shape)
+                        print(tensor_name, " : ", new_shape, file=f)
+
+
 
                     # TODO OP attr shape  modify
                     # placeholder = detection_graph.get_operation_by_name(input_name[:-2])

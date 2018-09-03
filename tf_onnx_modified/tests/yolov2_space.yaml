@@ -1,0 +1,6 @@
+yolov2:
+  model: tests/models/yolov2_pb/frozen_yolov2_space.pb
+  inputs:
+    "input:0": [1, 416, 416, 3]
+  outputs:
+    - conv_dec/BiasAdd:0

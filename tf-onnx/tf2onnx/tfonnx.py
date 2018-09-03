@@ -63,7 +63,7 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
     print("middle_inputs:", middle_inputs)
     new_input = None
 
-    print("-----1----- raw  len(ops):", len(ops))
+    #print("-----1----- raw  len(ops):", len(ops))
     # TODO 优化 删除 预处理部分
     if middle_inputs:
         new_input = middle_inputs[0]
@@ -107,12 +107,12 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
                         i -= 1
                 i += 1
 
-    print("-------2---------- final len(ops):", len(ops))
+    #print("-------2---------- final len(ops):", len(ops))
 
     # create dict with output to shape mappings
     for node in ops:
 
-        print("---", node.name)
+        #print("---", node.name)
 
         for out in node.outputs:
             shape = shape_override.get(out.name)
@@ -123,8 +123,8 @@ def tensorflow_to_onnx(graph, shape_override, middle_inputs=None):
                     shape = []
             # TODO dtype 的问题 Placeholder unit8  float32 怎么确定 新的 input node 的 dtype  就一定是 DT_FLOAT 呢
             if middle_inputs and node.type == "Placeholder":
-                print("node.type:", node.type)
-                print(node.name, new_input, "------shape------:", shape)
+                # print("node.type:", node.type)
+                # print(node.name, new_input, "------shape------:", shape)
                 dtypes[new_input] = utils.map_tf_dtype(types_pb2.DT_FLOAT)
                 output_shapes[new_input] = shape
                 output_shapes[out.name] = shape
@@ -639,7 +639,6 @@ def depthwiseconv_op(ctx, node, name, args):
     kernel_shape = ctx.get_shape(node.input[1])
     if len(kernel_shape) != 4:
         raise ValueError("only Conv2D is supported")
-
     k_h, k_w, k_input_channels, k_channel_multiplier = kernel_shape
     k_output_channels = i_c * k_channel_multiplier
 
@@ -650,7 +649,6 @@ def depthwiseconv_op(ctx, node, name, args):
     add_padding(ctx, node, kernel_shape, strides)
 
     new_kernel_shape = [k_output_channels, 1, k_h, k_w]
-
     nodes = conv_convert_inputs(ctx, node, with_kernel=True, new_kernel_shape=new_kernel_shape)
     return nodes
 
@@ -690,7 +688,6 @@ def pool_op(ctx, node, name, args):
     # T Y = MaxPool(T X, @AttrType.STRING auto_pad, @AttrType.INTS kernel_shape, @AttrType.INTS pads,
     #                   @AttrType.INTS strides)
     # above seems wrong - input[1] is ksize, input[2] is strides
-    print("pool_op")
     if len(node.input) < 3:
         kernel_shape = node.get_attr("ksize").ints
         kernel_shape = [kernel_shape[1], kernel_shape[2]]
@@ -763,6 +760,7 @@ def biasadd_op(ctx, node, name, args):
     # T output = BiasAdd(T value, T bias, @string data_format)
     # T output = BiasAddV1(T value, T bias)
     # TODO: for now use add. We may need to convert to NCHW.
+    # TODO 这里 为了转 ISD 要 把 name 换成 Add_ !!!
     node.type = "Add"
     return broadcast_op(ctx, node, name, args)
 
@@ -771,6 +769,7 @@ def biasadd_op7(ctx, node, name, args):
     # T output = BiasAdd(T value, T bias, @string data_format)
     # T output = BiasAddV1(T value, T bias)
     # TODO: for now use add. We may need to convert to NCHW.
+    # TODO 这里 为了转 ISD 要 把 name 换成 Add_ !!!
     node.type = "Add"
     return broadcast_op7(ctx, node, name, args)
 
@@ -1276,6 +1275,7 @@ def onehot_op(ctx, node, name, args):
 
 
 def fused_batchnorm_op7(ctx, node, name, args):
+    #print("fused_batchnorm_op7")
     node.type = "BatchNormalization"
     # tf inputs: x, scale, bias, mean, variance
     # tf outputs: y, batch_mean, batch_var
@@ -1283,6 +1283,7 @@ def fused_batchnorm_op7(ctx, node, name, args):
     # onnx inputs: X, scale, B, mean, variance, attributes: epsilon, momentum=0.9, spatial : 1
     # output: mean, var, savedmean, savedvar,
     is_test = node.get_attr("is_training")
+    #print("is_test:", is_test)
     if is_test.i == 0:
         output_len = len(node.output)
         for i in range(output_len - 1):
@@ -1316,7 +1317,7 @@ _OPSET_4 = {
     "Equal": (broadcast_op, []),
     "ExpandDims": (expanddims_op, []),
     "DepthwiseConv2d": (depthwiseconv_op, ["Conv"]),
-    "DepthwiseConv2dNative": (depthwiseconv2dnative_op, ["Conv"]),
+    "DepthwiseConv2dNative": (depthwiseconv_op, ["Conv"]),
     "Dropout": (direct_op, []),
     "Elu": (direct_op, []),
     "Exp": (direct_op, []),
@@ -1356,7 +1357,7 @@ _OPSET_4 = {
     "RealDiv": (broadcast_op, ["Div"]),
     "Reciprocal": (direct_op, []),
     "Relu": (direct_op, ["Relu"]),
-    "Relu6": (new_relu6_op, []),
+    "Relu6": (relu6_op, []),
     "Reshape": (reshape_op, ["Reshape"]),
     "Rsqrt": (rsqrt_op, []),
     "Shape": (direct_op, []),
@@ -1614,12 +1615,12 @@ def tensorflow_onnx_mapping(g, continue_on_error, custom_op_handlers):
 
 def tf_optimize(sess, inputs, outputs, graph_def):
     # print("tf_optimize begin")
+    # #"fold_constants(ignore_errors=true)", 注释掉这行可以对 FBN 进行修改
     """Optimize tensorflow graph for inference."""
     transforms = [
-        "fold_constants(ignore_errors=true)",
+        #"fold_constants(ignore_errors=true)",
         "fold_batch_norms",
         "fold_old_batch_norms",
-        "sort_by_execution_order",
 
     ]
     needed_names = [utils.node_name(i) for i in inputs] + [utils.node_name(i) for i in outputs]

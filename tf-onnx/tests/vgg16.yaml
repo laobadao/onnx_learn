@@ -1,0 +1,7 @@
+vgg-16:
+  model: tests/models/vgg16/frozen_model_vgg_16.pb
+  input_get: get_beach
+  inputs:
+    "input:0": [1, 240, 240, 3]
+  outputs:
+    - vgg_16/fc8/squeezed:0

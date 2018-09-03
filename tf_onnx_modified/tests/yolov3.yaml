@@ -1,0 +1,13 @@
+yolov3:
+  model: tests/models/yolov3/frozen_yolov3.pb
+  inputs:
+    "input:0": [1, 416, 416, 3]
+  outputs:
+    - output:0
+  middle_inputs:
+    "detector/truediv:0": [1, 416, 416, 3]
+  force_input_shape: True
+  middle_outputs:
+    - detector/yolo-v3/Reshape_8:0
+
+

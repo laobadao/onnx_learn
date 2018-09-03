@@ -1,0 +1,9 @@
+inception_v3_slim:
+  model: tests/models/inception_v3/inception_v3_2016_08_28_frozen.pb
+  input_get: get_beach
+  inputs:
+    "input:0": [1, 299, 299, 3]
+  outputs:
+    - InceptionV3/Predictions/Softmax:0
+  rtol: 0.02
+  atol: 0.000001

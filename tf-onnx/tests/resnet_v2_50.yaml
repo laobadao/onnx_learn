@@ -1,0 +1,7 @@
+resnet_v2_50:
+  model: tests/models/resnet_v2_50/frozen_resnet_v2_50.pb
+  input_get: get_beach
+  inputs:
+    "input:0": [1, 224, 224, 3]
+  outputs:
+    - resnet_v2_50/logits/BiasAdd:0

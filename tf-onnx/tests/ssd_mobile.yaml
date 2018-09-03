@@ -11,11 +11,16 @@ ssd_mobile:
   middle_inputs:
     "Preprocessor/sub:0": [1, 300, 300, 3]
   middle_outputs:
-    - Postprocessor/Reshape_1:0
-    - Postprocessor/Reshape:0
-    - Postprocessor/Slice:0
-#    - Postprocessor/ExpandDims_1:0
-#    - Postprocessor/Slice:0
-    # - Postprocessor/raw_box_scores:0
+    - BoxPredictor_0/BoxEncodingPredictor/BiasAdd:0
+    - BoxPredictor_0/ClassPredictor/BiasAdd:0
+    - BoxPredictor_1/BoxEncodingPredictor/BiasAdd:0
+    - BoxPredictor_1/ClassPredictor/BiasAdd:0
+    - BoxPredictor_2/BoxEncodingPredictor/BiasAdd:0
+    - BoxPredictor_2/ClassPredictor/BiasAdd:0
+    - BoxPredictor_3/BoxEncodingPredictor/BiasAdd:0
+    - BoxPredictor_3/ClassPredictor/BiasAdd:0
+    - BoxPredictor_4/BoxEncodingPredictor/BiasAdd:0
+    - BoxPredictor_4/ClassPredictor/BiasAdd:0
+    - BoxPredictor_5/BoxEncodingPredictor/BiasAdd:0
+    - BoxPredictor_5/ClassPredictor/BiasAdd:0
 
-    

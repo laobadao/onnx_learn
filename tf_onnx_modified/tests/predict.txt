@@ -1,0 +1,4882 @@
+
+	created resnet_v1_50/resnet_v1_50.onnx
+run_caffe2()
+prepared_backend.predict_net: name: "tf2onnx_predict"
+op {
+  input: "input:0"
+  output: "resnet_v1_50/Pad:0"
+  name: "resnet_v1_50/Pad"
+  type: "PadImage"
+  arg {
+    name: "pads"
+    ints: 3
+    ints: 3
+    ints: 3
+    ints: 3
+  }
+}
+op {
+  input: "resnet_v1_50/Pad:0"
+  output: "resnet_v1_50/conv1/Conv2D__2:0"
+  name: "resnet_v1_50/conv1/Conv2D__2"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/conv1/Conv2D__2:0"
+  input: "resnet_v1_50/conv1/weights:0"
+  output: "resnet_v1_50/conv1/Conv2D:0"
+  name: "resnet_v1_50/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "kernels"
+    ints: 7
+    ints: 7
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 2
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/conv1/Conv2D:0"
+  input: "resnet_v1_50/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/conv1/BatchNorm/FusedBatchNorm__5:0"
+  name: "resnet_v1_50/conv1/BatchNorm/FusedBatchNorm__5"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/conv1/BatchNorm/FusedBatchNorm__5:0"
+  output: "resnet_v1_50/conv1/Relu:0"
+  name: "resnet_v1_50/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/conv1/Relu:0"
+  output: "resnet_v1_50/pool1/MaxPool__6:0"
+  name: "resnet_v1_50/pool1/MaxPool__6"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/pool1/MaxPool__6:0"
+  output: "resnet_v1_50/pool1/MaxPool:0"
+  name: "resnet_v1_50/pool1/MaxPool"
+  type: "MaxPool"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 2
+    ints: 2
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+}
+op {
+  input: "resnet_v1_50/pool1/MaxPool:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__15:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__15"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__15:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/Conv2D__16:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/Conv2D__16"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/Conv2D__16:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__19:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__19"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__19:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/Conv2D__20:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/Conv2D__20"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/Conv2D__20:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__23:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__23"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/pool1/MaxPool:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/weights:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/Conv2D:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/Conv2D:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__11:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__11"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__11:0"
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__23:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block1/unit_1/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block1/unit_1/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/Conv2D__24:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/Conv2D__24"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/Conv2D__24:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__27:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__27"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__27:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/Conv2D__28:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/Conv2D__28"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/Conv2D__28:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__31:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__31"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__31:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/Conv2D__32:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/Conv2D__32"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/Conv2D__32:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__35:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__35"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_1/bottleneck_v1/Relu:0"
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__35:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block1/unit_2/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block1/unit_2/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/Conv2D__38:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/Conv2D__38"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/Conv2D__38:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__41:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__41"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__41:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/Pad:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/Pad"
+  type: "PadImage"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/Pad:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/Conv2D__42:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/Conv2D__42"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/Conv2D__42:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 2
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__45:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__45"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__45:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/Conv2D__46:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/Conv2D__46"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/Conv2D__46:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__49:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__49"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_2/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/shortcut/MaxPool__36:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/shortcut/MaxPool__36"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/shortcut/MaxPool__36:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/shortcut/MaxPool:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/shortcut/MaxPool"
+  type: "MaxPool"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "strides"
+    ints: 2
+    ints: 2
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/shortcut/MaxPool:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/shortcut/MaxPool__37:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/shortcut/MaxPool__37"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/shortcut/MaxPool__37:0"
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__49:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block1/unit_3/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block1/unit_3/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/Conv2D__54:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/Conv2D__54"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/Conv2D__54:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__57:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__57"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__57:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/Conv2D__58:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/Conv2D__58"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/Conv2D__58:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__61:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__61"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__61:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/Conv2D__62:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/Conv2D__62"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/Conv2D__62:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__65:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__65"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block1/unit_3/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/Conv2D__50:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/Conv2D__50"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/Conv2D__50:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/weights:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__53:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__53"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__53:0"
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__65:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block2/unit_1/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block2/unit_1/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/Conv2D__66:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/Conv2D__66"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/Conv2D__66:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__69:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__69"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__69:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/Conv2D__70:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/Conv2D__70"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/Conv2D__70:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__73:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__73"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__73:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/Conv2D__74:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/Conv2D__74"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/Conv2D__74:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__77:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__77"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_1/bottleneck_v1/Relu:0"
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__77:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block2/unit_2/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block2/unit_2/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/Conv2D__78:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/Conv2D__78"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/Conv2D__78:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__81:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__81"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__81:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/Conv2D__82:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/Conv2D__82"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/Conv2D__82:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__85:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__85"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__85:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/Conv2D__86:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/Conv2D__86"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/Conv2D__86:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__89:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__89"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_2/bottleneck_v1/Relu:0"
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__89:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block2/unit_3/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block2/unit_3/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/Conv2D__92:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/Conv2D__92"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/Conv2D__92:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__95:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__95"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__95:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/Pad:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/Pad"
+  type: "PadImage"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/Pad:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/Conv2D__96:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/Conv2D__96"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/Conv2D__96:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 2
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__99:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__99"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__99:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/Conv2D__100:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/Conv2D__100"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/Conv2D__100:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__103:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__103"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_3/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/shortcut/MaxPool__90:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/shortcut/MaxPool__90"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/shortcut/MaxPool__90:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/shortcut/MaxPool:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/shortcut/MaxPool"
+  type: "MaxPool"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "strides"
+    ints: 2
+    ints: 2
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/shortcut/MaxPool:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/shortcut/MaxPool__91:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/shortcut/MaxPool__91"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/shortcut/MaxPool__91:0"
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__103:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block2/unit_4/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block2/unit_4/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/Conv2D__108:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/Conv2D__108"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/Conv2D__108:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__111:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__111"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__111:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/Conv2D__112:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/Conv2D__112"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/Conv2D__112:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__115:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__115"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__115:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/Conv2D__116:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/Conv2D__116"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/Conv2D__116:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__119:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__119"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block2/unit_4/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/Conv2D__104:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/Conv2D__104"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/Conv2D__104:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/weights:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__107:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__107"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__107:0"
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__119:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block3/unit_1/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block3/unit_1/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/Conv2D__120:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/Conv2D__120"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/Conv2D__120:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__123:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__123"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__123:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/Conv2D__124:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/Conv2D__124"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/Conv2D__124:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__127:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__127"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__127:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/Conv2D__128:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/Conv2D__128"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/Conv2D__128:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__131:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__131"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_1/bottleneck_v1/Relu:0"
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__131:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block3/unit_2/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block3/unit_2/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/Conv2D__132:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/Conv2D__132"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/Conv2D__132:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__135:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__135"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__135:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/Conv2D__136:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/Conv2D__136"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/Conv2D__136:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__139:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__139"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__139:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/Conv2D__140:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/Conv2D__140"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/Conv2D__140:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__143:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__143"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_2/bottleneck_v1/Relu:0"
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__143:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block3/unit_3/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block3/unit_3/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/Conv2D__144:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/Conv2D__144"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/Conv2D__144:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__147:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__147"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__147:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/Conv2D__148:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/Conv2D__148"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/Conv2D__148:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__151:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__151"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__151:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/Conv2D__152:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/Conv2D__152"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/Conv2D__152:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__155:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__155"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_3/bottleneck_v1/Relu:0"
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__155:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block3/unit_4/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block3/unit_4/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/Conv2D__156:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/Conv2D__156"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/Conv2D__156:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__159:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__159"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__159:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/Conv2D__160:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/Conv2D__160"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/Conv2D__160:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__163:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__163"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__163:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/Conv2D__164:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/Conv2D__164"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/Conv2D__164:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__167:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__167"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_4/bottleneck_v1/Relu:0"
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__167:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block3/unit_5/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block3/unit_5/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/Conv2D__170:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/Conv2D__170"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/Conv2D__170:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__173:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__173"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__173:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/Pad:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/Pad"
+  type: "PadImage"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/Pad:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/Conv2D__174:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/Conv2D__174"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/Conv2D__174:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 2
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__177:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__177"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__177:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/Conv2D__178:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/Conv2D__178"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/Conv2D__178:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__181:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__181"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_5/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/shortcut/MaxPool__168:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/shortcut/MaxPool__168"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/shortcut/MaxPool__168:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/shortcut/MaxPool:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/shortcut/MaxPool"
+  type: "MaxPool"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "strides"
+    ints: 2
+    ints: 2
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/shortcut/MaxPool:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/shortcut/MaxPool__169:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/shortcut/MaxPool__169"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/shortcut/MaxPool__169:0"
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__181:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block3/unit_6/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block3/unit_6/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/Conv2D__186:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/Conv2D__186"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/Conv2D__186:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__189:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__189"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__189:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/Conv2D__190:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/Conv2D__190"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/Conv2D__190:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__193:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__193"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__193:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/Conv2D__194:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/Conv2D__194"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/Conv2D__194:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__197:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__197"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block3/unit_6/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/Conv2D__182:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/Conv2D__182"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/Conv2D__182:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/weights:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/Conv2D:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/Conv2D:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__185:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__185"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/FusedBatchNorm__185:0"
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__197:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block4/unit_1/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block4/unit_1/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/Conv2D__198:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/Conv2D__198"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/Conv2D__198:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__201:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__201"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__201:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/Conv2D__202:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/Conv2D__202"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/Conv2D__202:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__205:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__205"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__205:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/Conv2D__206:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/Conv2D__206"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/Conv2D__206:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__209:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__209"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_1/bottleneck_v1/Relu:0"
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__209:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block4/unit_2/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block4/unit_2/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/Conv2D__210:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/Conv2D__210"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/Conv2D__210:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/weights:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/Conv2D:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/Conv2D:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__213:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__213"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/FusedBatchNorm__213:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/Relu:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/Relu:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/Conv2D__214:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/Conv2D__214"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/Conv2D__214:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/weights:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/Conv2D:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 1
+    ints: 1
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "kernels"
+    ints: 3
+    ints: 3
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/Conv2D:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__217:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__217"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/FusedBatchNorm__217:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/Relu:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/Relu:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/Conv2D__218:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/Conv2D__218"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/Conv2D__218:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/weights:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/Conv2D:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/Conv2D:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm"
+  type: "SpatialBN"
+  arg {
+    name: "epsilon"
+    f: 1.0009999641624745e-05
+  }
+  arg {
+    name: "is_test"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__221:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__221"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_2/bottleneck_v1/Relu:0"
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/FusedBatchNorm__221:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/add:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/add"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/add:0"
+  output: "resnet_v1_50/block4/unit_3/bottleneck_v1/Relu:0"
+  name: "resnet_v1_50/block4/unit_3/bottleneck_v1/Relu"
+  type: "Relu"
+}
+op {
+  input: "resnet_v1_50/block4/unit_3/bottleneck_v1/Relu:0"
+  output: "resnet_v1_50/pool5:0"
+  name: "resnet_v1_50/pool5"
+  type: "ReduceMean"
+  arg {
+    name: "axes"
+    ints: 1
+    ints: 2
+  }
+  arg {
+    name: "keepdims"
+    i: 1
+  }
+}
+op {
+  input: "resnet_v1_50/pool5:0"
+  output: "resnet_v1_50/logits/Conv2D__222:0"
+  name: "resnet_v1_50/logits/Conv2D__222"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 3
+    ints: 1
+    ints: 2
+  }
+}
+op {
+  input: "resnet_v1_50/logits/Conv2D__222:0"
+  input: "resnet_v1_50/logits/weights:0"
+  output: "resnet_v1_50/logits/Conv2D:0"
+  name: "resnet_v1_50/logits/Conv2D"
+  type: "Conv"
+  arg {
+    name: "pads"
+    ints: 0
+    ints: 0
+    ints: 0
+    ints: 0
+  }
+  arg {
+    name: "kernels"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "dilations"
+    ints: 1
+    ints: 1
+  }
+  arg {
+    name: "strides"
+    ints: 1
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/logits/Conv2D:0"
+  output: "resnet_v1_50/logits/Conv2D__223:0"
+  name: "resnet_v1_50/logits/Conv2D__223"
+  type: "Transpose"
+  arg {
+    name: "axes"
+    ints: 0
+    ints: 2
+    ints: 3
+    ints: 1
+  }
+}
+op {
+  input: "resnet_v1_50/logits/Conv2D__223:0"
+  input: "resnet_v1_50/logits/biases:0"
+  output: "resnet_v1_50/logits/BiasAdd:0"
+  name: "resnet_v1_50/logits/BiasAdd"
+  type: "Add"
+  arg {
+    name: "broadcast"
+    i: 1
+  }
+}
+device_option {
+  device_type: 0
+  cuda_gpu_id: 0
+}
+external_input: "resnet_v1_50/conv1/weights:0"
+external_input: "resnet_v1_50/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/weights:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block1/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block1/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block1/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/weights:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block2/unit_4/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/weights:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_4/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_5/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block3/unit_6/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/weights:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/shortcut/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block4/unit_1/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block4/unit_2/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/weights:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv1/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/weights:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv2/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/weights:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/gamma:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/beta:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/moving_mean:0"
+external_input: "resnet_v1_50/block4/unit_3/bottleneck_v1/conv3/BatchNorm/moving_variance:0"
+external_input: "resnet_v1_50/logits/weights:0"
+external_input: "resnet_v1_50/logits/biases:0"
+external_input: "input:0"
+external_output: "resnet_v1_50/logits/BiasAdd:0"
+
+	run_onnx FAIL [enforce fail at conv_op_impl.h:30] C == filter.dim32(1) * group_. Convolution op: input channels does not match: # of input channels 9 is not equal to kernel channels * group:3*1 Error from operator: 
+input: "resnet_v1_50/conv1/Conv2D__2:0" input: "resnet_v1_50/conv1/weights:0" output: "resnet_v1_50/conv1/Conv2D:0" name: "resnet_v1_50/conv1/Conv2D" type: "Conv" arg { name: "kernels" ints: 7 ints: 7 } arg { name: "dilations" ints: 1 ints: 1 } arg { name: "strides" ints: 2 ints: 2 } device_option { device_type: 0 cuda_gpu_id: 0 }
+=== RESULT: 1 failed of 1, backend=caffe2
