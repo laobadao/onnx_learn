@@ -157,7 +157,6 @@ def multiclass_non_max_suppression(boxes,
           boxlist_filtered.get_field(fields.BoxListFields.scores),
           max_selection_size,
           iou_threshold=iou_thresh)
-      print("selected_indices:", selected_indices.name)
 
       nms_result = box_list_ops.gather(boxlist_filtered, selected_indices)
       nms_result.add_field(

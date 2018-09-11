@@ -87,7 +87,7 @@ def _build_non_max_suppressor(type):
         score_threshold = 0.0
         iou_threshold = 0.6
         max_detections_per_class = 100
-        max_total_detections = 300
+        max_total_detections = 100
     else:
         raise ValueError('type must be ssd or faster_rcnn string')
 

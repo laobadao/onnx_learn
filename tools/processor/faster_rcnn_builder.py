@@ -72,7 +72,7 @@ def _postprocess_rpn(
         rpn_box_encodings_batch,
         rpn_objectness_predictions_with_background_batch,
         anchors,
-        image_shapes):
+        image_shapes, first_stage_max_proposals):
     """Converts first stage prediction tensors from the RPN to proposals.
 
     This function decodes the raw RPN predictions, runs non-max suppression
@@ -115,9 +115,12 @@ def _postprocess_rpn(
     """
     first_stage_nms_score_threshold = 0.0
     first_stage_nms_iou_threshold = 0.7
-    first_stage_max_proposals = 100
+    first_stage_max_proposals = first_stage_max_proposals
 
     rpn_box_encodings_batch = tf.expand_dims(rpn_box_encodings_batch, axis=2)
+
+    print("rpn_box_encodings_batch name:", rpn_box_encodings_batch.name)
+    print("rpn_box_encodings_batch: shape", rpn_box_encodings_batch.shape)
     rpn_encodings_shape = shape_utils.combined_static_and_dynamic_shape(
         rpn_box_encodings_batch)
     tiled_anchor_boxes = tf.tile(
@@ -125,6 +128,7 @@ def _postprocess_rpn(
     print("_batch_decode_boxes 1")
     proposal_boxes = _batch_decode_boxes(rpn_box_encodings_batch,
                                          tiled_anchor_boxes)
+
     proposal_boxes = tf.squeeze(proposal_boxes, axis=2)
     rpn_objectness_softmax_without_background = tf.nn.softmax(
         rpn_objectness_predictions_with_background_batch)[:, :, 1]
@@ -203,6 +207,7 @@ def _batch_decode_boxes(box_encodings, anchor_boxes):
 
     tiled_anchor_boxes = tf.tile(
         tf.expand_dims(anchor_boxes, 2), [1, 1, num_classes, 1])
+    print("tiled_anchor_boxes:", tiled_anchor_boxes.name)
     tiled_anchors_boxlist = box_list.BoxList(
         tf.reshape(tiled_anchor_boxes, [-1, 4]))
 
@@ -222,6 +227,7 @@ def _batch_decode_boxes(box_encodings, anchor_boxes):
     decoded_boxes_reahpe = tf.reshape(decoded_boxes.get(),
                tf.stack([combined_shape[0], combined_shape[1],
                          num_classes, 4]))
+
 
     return decoded_boxes_reahpe
 
@@ -321,7 +327,7 @@ def _predict_second_stage_1(rpn_box_encodings,
 
     proposal_boxes_normalized, _, num_proposals = _postprocess_rpn(
         rpn_box_encodings, rpn_objectness_predictions_with_background,
-        anchors, image_shape_2d)
+        anchors, image_shape_2d, first_stage_max_proposals= 100)
 
     cropped_regions = (
         _compute_second_stage_input_feature_maps(
@@ -377,12 +383,11 @@ def second_stage_box_predictor(preprocessed_inputs, box_encoding_reshape, class_
                                rpn_features_to_crop,
                                rpn_box_encodings,
                                rpn_objectness_predictions_with_background,
-                                true_image_shapes,
+                               true_image_shapes,
                                rpn_box_predictor_features):
 
     image_shape = shape_utils.combined_static_and_dynamic_shape(
         preprocessed_inputs)
-    image_shape_2d = _image_batch_shape_2d(image_shape)
     first_stage_anchor_generator = anchor_generator_builder.build("grid_anchor_generator")
     # The Faster R-CNN paper recommends pruning anchors that venture outside
     # the image window at training time and clipping at inference time.
@@ -398,10 +403,35 @@ def second_stage_box_predictor(preprocessed_inputs, box_encoding_reshape, class_
 
     print("second_stage_box_predictor _postprocess_rpn")
 
+    image_shape_2d = _image_batch_shape_2d(image_shape)
+
+    num_anchors_per_location = (
+        first_stage_anchor_generator.num_anchors_per_location())
+
+    if len(num_anchors_per_location) != 1:
+        raise RuntimeError('anchor_generator is expected to generate anchors '
+                           'corresponding to a single feature map.')
+    box_predictions = _first_stage_box_predictor_predict([rpn_box_predictor_features], [rpn_box_encodings],
+                                                         [rpn_objectness_predictions_with_background],
+                                                         num_anchors_per_location)
+
+    predictions_box_encodings = tf.concat(
+        box_predictions[BOX_ENCODINGS], axis=1)
+
+    print("squeeze predictions_box_encodings.shape:", predictions_box_encodings.shape)
+
+    rpn_box_encodings = tf.squeeze(predictions_box_encodings, axis=2)
+
+    print("rpn_box_encodings.shape:", rpn_box_encodings.shape)
+
+    rpn_objectness_predictions_with_background = tf.concat(
+        box_predictions[CLASS_PREDICTIONS_WITH_BACKGROUND],
+        axis=1)
+
     proposal_boxes_normalized, _, num_proposals = _postprocess_rpn(
         rpn_box_encodings, rpn_objectness_predictions_with_background,
-        _anchors.get(), image_shape_2d)
-    #
+        _anchors.get(), image_shape_2d, first_stage_max_proposals=100)
+
 
     prediction_dict = {
         'rpn_box_predictor_features': rpn_box_predictor_features,
@@ -428,8 +458,6 @@ def second_stage_box_predictor(preprocessed_inputs, box_encoding_reshape, class_
             class_predictions_with_background,
         'num_proposals': num_proposals,
         'proposal_boxes': absolute_proposal_boxes,
-        'box_classifier_features': box_classifier_features,
-        'proposal_boxes_normalized': proposal_boxes_normalized,
     }
 
     prediction_dict.update(prediction_dict1)
@@ -438,35 +466,35 @@ def second_stage_box_predictor(preprocessed_inputs, box_encoding_reshape, class_
 
     return result_output
 
-def _predict_second_stage(rpn_box_encodings,
-                            rpn_objectness_predictions_with_background,
-                            rpn_features_to_crop,
-                            anchors,
-                            image_shape,
-                            true_image_shapes):
-
-
-    refined_box_encodings = tf.squeeze(
-        box_predictions[box_predictor.BOX_ENCODINGS],
-        axis=1, name='all_refined_box_encodings')
-    class_predictions_with_background = tf.squeeze(
-        box_predictions[box_predictor.CLASS_PREDICTIONS_WITH_BACKGROUND],
-        axis=1, name='all_class_predictions_with_background')
-
-    absolute_proposal_boxes = ops.normalized_to_image_coordinates(
-        proposal_boxes_normalized, image_shape, self._parallel_iterations)
-
-    prediction_dict = {
-        'refined_box_encodings': refined_box_encodings,
-        'class_predictions_with_background':
-        class_predictions_with_background,
-        'num_proposals': num_proposals,
-        'proposal_boxes': absolute_proposal_boxes,
-        'box_classifier_features': box_classifier_features,
-        'proposal_boxes_normalized': proposal_boxes_normalized,
-    }
-
-    return prediction_dict
+# def _predict_second_stage(rpn_box_encodings,
+#                             rpn_objectness_predictions_with_background,
+#                             rpn_features_to_crop,
+#                             anchors,
+#                             image_shape,
+#                             true_image_shapes):
+#
+#
+#     refined_box_encodings = tf.squeeze(
+#         box_predictions[box_predictor.BOX_ENCODINGS],
+#         axis=1, name='all_refined_box_encodings')
+#     class_predictions_with_background = tf.squeeze(
+#         box_predictions[box_predictor.CLASS_PREDICTIONS_WITH_BACKGROUND],
+#         axis=1, name='all_class_predictions_with_background')
+#
+#     absolute_proposal_boxes = ops.normalized_to_image_coordinates(
+#         proposal_boxes_normalized, image_shape, self._parallel_iterations)
+#
+#     prediction_dict = {
+#         'refined_box_encodings': refined_box_encodings,
+#         'class_predictions_with_background':
+#         class_predictions_with_background,
+#         'num_proposals': num_proposals,
+#         'proposal_boxes': absolute_proposal_boxes,
+#         'box_classifier_features': box_classifier_features,
+#         'proposal_boxes_normalized': proposal_boxes_normalized,
+#     }
+#
+#     return prediction_dict
 
 
 def second_postprocess(prediction_dict, true_image_shapes):
@@ -623,7 +651,7 @@ def _postprocess_box_classifier(
           that a pixel-wise sigmoid score converter is applied to the detection
           masks.
     """
-    _first_stage_max_proposals = 300
+    _first_stage_max_proposals = 100
 
     max_num_proposals = _first_stage_max_proposals
 
@@ -631,13 +659,18 @@ def _postprocess_box_classifier(
     _proposal_target_assigner = target_assigner.create_target_assigner(
         'FasterRCNN', 'proposal')
     _box_coder = _proposal_target_assigner.box_coder
+
     _second_stage_nms_fn, second_stage_score_conversion_fn = post_processing_builder.build(config.FASTER_RCNN)
+
     refined_box_encodings_batch = tf.reshape(
         refined_box_encodings,
         [-1,
          max_num_proposals,
          refined_box_encodings.shape[1],
          _box_coder.code_size])
+
+
+
     class_predictions_with_background_batch = tf.reshape(
         class_predictions_with_background,
         [-1, max_num_proposals, num_classes + 1]

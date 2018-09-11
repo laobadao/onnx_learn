@@ -72,17 +72,17 @@ def run_tensorflow(sess, inputs, test_name):
     crop_and_resize_out = sess.run(crop_and_resize_tensor, feed_dict=feed_dict)
     print("crop_and_resize_out shape:", crop_and_resize_out[0].shape)
 
-    # result_final = sess.run(out_tensor_final, feed_dict=feed_dict)
+    result_final = sess.run(out_tensor_final, feed_dict=feed_dict)
     #
     output_dict = {}
     #
-    for i in range(len(result_middle)):
-        print("result_middle shape:", result_middle[i].shape)
+    for i in range(len(result_final)):
+        print("result_final shape:", result_final[i].shape)
     #
-    # output_dict["detection_boxes"] = result_final[0]
-    # output_dict["detection_scores"] = result_final[1]
-    # output_dict["num_detections"] = result_final[2]
-    # output_dict["detection_classes"] = result_final[3]
+    output_dict["detection_boxes"] = result_final[0]
+    output_dict["detection_scores"] = result_final[1]
+    output_dict["num_detections"] = result_final[2]
+    output_dict["detection_classes"] = result_final[3]
 
     print("raw tf pb run done")
     return result_input, result_middle, crop_and_resize_out, output_dict
@@ -142,11 +142,12 @@ def main():
         # run the model with tensorflow
         result_input, result_middle, crop_and_resize_out, output_dict = run_tensorflow(sess, inputs, test_name)
 
-    # show_detection_result(result_final, 'raw')
+    show_detection_result(output_dict, 'raw')
     #
     result, test_output_op = run_faster_rcnn_tf_post(result_input, result_middle, crop_and_resize_out, test_name)
-    # show_detection_result(result, 'modified')
-    # check_result(result_final, result, test_output_op)
+    show_detection_result(result, 'modified')
+
+    check_result(output_dict, result, test_output_op)
 
     print("check_result Done")
 
@@ -235,33 +236,35 @@ def run_faster_rcnn_tf_post(result_input, result_middle, crop_and_resize_out, te
                                 class_prediction_reshape=class_prediction_reshape_holder,
                                 rpn_features_to_crop=rpn_features_to_crop_holder,
                                 rpn_box_encodings=box_encodings_holder,
-                                rpn_objectness_predictions_with_background= class_predictions_with_background_holder,
-                                true_image_shapes=result_input_shape_holder
+                                rpn_objectness_predictions_with_background=class_predictions_with_background_holder,
+                                true_image_shapes=result_input_shape_holder,
+                                rpn_box_predictor_features=rpn_box_predictor_features_holder
         )
 
         feed_dict1[box_encoding_reshape_holder] = box_encoding_reshape
-        feed_dict1[class_prediction_reshape_holder] =class_prediction_reshape
+        feed_dict1[class_prediction_reshape_holder] = class_prediction_reshape
         feed_dict1[result_input_shape_holder] = result_input_shape_np
 
         result2 = sess1.run(second_stage_out, feed_dict=feed_dict1)
 
-        print("result2:", result2.shape)
+        # print("result2:", result2)
 
         # print("crop_and_resize_out[0]:", crop_and_resize_out[0][0].shape)
         # print("diff crop_and_resize:", crop_and_resize_out[0][0] - result[0])
 
-        # print("result detection_boxes:", result["detection_boxes"].shape)
-        # print("result detection_scores:", result["detection_scores"].shape)
-        # print("result detection_classes:", result["detection_classes"].shape)
-        # print("result num_detections:", result["num_detections"].shape)
+        print("result detection_boxes:", result2["detection_boxes"].shape)
+        print("result detection_scores:", result2["detection_scores"].shape)
+        print("result detection_classes:", result2["detection_classes"].shape)
+        print("result num_detections:", result2["num_detections"].shape)
 
-    return result, test_output_op
+    return result2, test_output_op
 
 
 def check_result(result_final, result, test_output_op):
-    print("detection_scores:", result["detection_scores"])
+    print("detection_scores:", result["detection_scores"].shape)
+    print("detection_scores:", result_final["detection_scores"].shape)
     print("diff:", result_final["detection_scores"] - result["detection_scores"])
-    print("diff one  op out:", test_output_op[0] - MIDDLE_OUT)
+    # print("diff one  op out:", test_output_op[0] - MIDDLE_OUT)
 
 
 if __name__ == "__main__":
