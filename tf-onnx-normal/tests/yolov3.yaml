@@ -1,0 +1,32 @@
+yolov3:
+  model: tests/models/yolov3/frozen_yolov3.pb
+  inputs:
+    "input:0": [1, 416, 416, 3]
+  outputs:
+    - output:0
+  middle_inputs:
+    "detector/truediv:0": [1, 416, 416, 3]
+  force_input_shape: True
+  middle_outputs:
+    - detector/yolo-v3/Reshape_8:0
+
+
+bazel-bin/tensorflow/python/tools/optimize_for_inference --input=frozen_yolov3.pb --output=yolov3_optimize_inference_pre.pb --output_names=detector/yolo-v3/Reshape_8  --frozen_graph=True --input_names=input
+
+
+
+bazel-bin/tensorflow/tools/quantization/quantize_graph --input=yolov3_optimize_inference_pre.pb --output_node_names="detector/yolo-v3/Reshape_8" --output=quantized_yolov3_graph.pb --mode=eightbit
+
+
+
+bazel-bin/tensorflow/contrib/lite/toco/toco \
+  --input_file=yolov3_optimize_inference_pre.pb \
+  --input_format=TENSORFLOW_GRAPHDEF \
+  --output_format=TFLITE \
+  --output_file=quantized_yolov3.tflite \
+  --inference_type=QUANTIZED_UINT8 \
+  --input_arrays=input \
+  --output_arrays=detector/yolo-v3/Reshape_8 \
+  --input_shapes=1,416,416,3 \
+  --default_ranges_min=0  \
+  --default_ranges_max=255

@@ -1,0 +1,13 @@
+resnet_v1_50:
+  model: tests/models/resnet_v1_50/pb_model/frozen_resnet_v1_50.pb
+  input_get: get_beach
+  inputs:
+    "input:0": [1, 224, 224, 3]
+  outputs:
+    - resnet_v1_50/logits/BiasAdd:0
+
+bazel run tensorflow/contrib/lite:toco  ��input_file=frozen_resnet_v1_50.pb ��output_file=tflite_model_test.tflite --input_format=TENSORFLOW_GRAPHDEF --output_format=TFLITE --inference_type=FLOAT --input_shape="1,224, 224,3"  --input_array=input --output_array=resnet_v1_50/logits/BiasAdd
+
+
+bazel run tensorflow/contrib/lite:toco ��input_file=frozen_resnet_v1_50.pb ��output_file=frozen_resnet_v1_50.lite ��input_format=TENSORFLOW_GRAPHDEF ��output_format=TFLITE ��input_shape=1,224,224,3 ��input_array=input ��output_array=resnet_v1_50/logits/BiasAdd ��inference_type=FLOAT ��input_data_type=FLOAT
+

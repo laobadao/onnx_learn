@@ -1,0 +1,39 @@
+faster_rcnn_resnet50_stage2:
+  model: /data1/home/nntool/jjzhao/tensorflow-onnx/tests/models/faster_rcnn_resnet50/frozen_inference_graph.pb
+  input_get: get_ssd_image
+  inputs:
+    "image_tensor:0": [1, 600, 966, 3]
+  outputs:
+    - detection_boxes:0
+    - detection_scores:0
+    - num_detections:0
+    - detection_classes:0
+  middle_inputs:
+    "CropAndResize:0": [100, 14, 14, 1024]
+  middle_outputs:
+    - Squeeze_2:0
+    - Squeeze_3:0
+  multiple_parts: True
+  rtol: 0.1
+  atol: 0.00001
+
+
+
+bazel-bin/tensorflow/python/tools/optimize_for_inference --input=frozen_inference_graph.pb --output=faster_optimize_stage2.pb --output_names=SecondStageBoxPredictor/Reshape,SecondStageBoxPredictor/Reshape_1  --frozen_graph=True --input_names=CropAndResize
+
+
+bazel-bin/tensorflow/tools/quantization/quantize_graph --input=faster_optimize_stage2.pb --output_node_names="SecondStageBoxPredictor/Reshape,SecondStageBoxPredictor/Reshape_1" --output=quantized_faster_rcnn_2.pb --mode=eightbit
+
+
+
+bazel-bin/tensorflow/contrib/lite/toco/toco \
+  --input_file=faster_optimize_stage2.pb \
+  --input_format=TENSORFLOW_GRAPHDEF \
+  --output_format=TFLITE \
+  --output_file=quantized_faster_rcnn_stage_2.tflite \
+  --inference_type=QUANTIZED_UINT8 \
+  --input_arrays=CropAndResize \
+  --output_arrays=SecondStageBoxPredictor/Reshape,SecondStageBoxPredictor/Reshape_1 \
+  --input_shapes=100,14,14,1024 \
+  --default_ranges_min=0  \
+  --default_ranges_max=255

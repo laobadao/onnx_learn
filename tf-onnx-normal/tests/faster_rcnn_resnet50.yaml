@@ -1,0 +1,39 @@
+faster_rcnn_resnet50:
+  model: /data1/home/nntool/jjzhao/tensorflow-onnx/tests/models/faster_rcnn_resnet50/frozen_inference_graph.pb
+  input_get: get_ssd_image
+  inputs:
+    "image_tensor:0": [1, 600, 966, 3]
+  outputs:
+    - detection_boxes:0
+    - detection_scores:0
+    - num_detections:0
+    - detection_classes:0
+  middle_inputs:
+    "Preprocessor/sub:0": [1, 600,966, 3]
+  middle_outputs:
+    - FirstStageBoxPredictor/BoxEncodingPredictor/BiasAdd:0
+    - FirstStageBoxPredictor/ClassPredictor/BiasAdd:0
+    - Conv/Relu6:0
+    - FirstStageFeatureExtractor/resnet_v1_50/resnet_v1_50/block3/unit_6/bottleneck_v1/Relu:0
+  rtol: 0.1
+  atol: 0.00001
+
+
+bazel-bin/tensorflow/python/tools/optimize_for_inference --input=frozen_inference_graph.pb --output=faster_rcnn_opt_stage1.pb --output_names=FirstStageBoxPredictor/BoxEncodingPredictor/BiasAdd,FirstStageBoxPredictor/ClassPredictor/BiasAdd,Conv/Relu6,FirstStageFeatureExtractor/resnet_v1_50/resnet_v1_50/block3/unit_6/bottleneck_v1/Relu  --frozen_graph=True --input_names=Preprocessor/sub
+
+
+bazel-bin/tensorflow/tools/quantization/quantize_graph --input=faster_rcnn_opt_stage1.pb --output_node_names="FirstStageBoxPredictor/BoxEncodingPredictor/BiasAdd,FirstStageBoxPredictor/ClassPredictor/BiasAdd,Conv/Relu6,FirstStageFeatureExtractor/resnet_v1_50/resnet_v1_50/block3/unit_6/bottleneck_v1/Relu" --output=quantized_faster_rcnn_1.pb --mode=eightbit
+
+
+
+bazel-bin/tensorflow/contrib/lite/toco/toco \
+  --input_file=faster_rcnn_opt_stage1.pb \
+  --input_format=TENSORFLOW_GRAPHDEF \
+  --output_format=TFLITE \
+  --output_file=quantized_faster_rcnn_stage_1.tflite \
+  --inference_type=QUANTIZED_UINT8 \
+  --input_arrays=Preprocessor/sub \
+  --output_arrays=FirstStageBoxPredictor/BoxEncodingPredictor/BiasAdd,FirstStageBoxPredictor/ClassPredictor/BiasAdd,Conv/Relu6,FirstStageFeatureExtractor/resnet_v1_50/resnet_v1_50/block3/unit_6/bottleneck_v1/Relu \
+  --input_shapes=1,600,966,3 \
+  --default_ranges_min=0  \
+  --default_ranges_max=255

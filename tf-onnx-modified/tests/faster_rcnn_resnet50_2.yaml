@@ -1,0 +1,16 @@
+faster_rcnn_resnet50_stage2:
+  model: tests/models/faster_rcnn_resnet50/frozen_inference_graph.pb
+  inputs:
+    "image_tensor:0": [1, 600, 966, 3]
+  outputs:
+    - detection_boxes:0
+    - detection_scores:0
+    - num_detections:0
+    - detection_classes:0
+  middle_inputs:
+    "CropAndResize:0": [100, 14, 14, 1024]
+  force_input_shape: True
+  middle_outputs:
+    - SecondStageBoxPredictor/Reshape:0
+    - SecondStageBoxPredictor/Reshape_1:0
+  

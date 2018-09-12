@@ -1,0 +1,8 @@
+vgg-16:
+  model: tests/models/vgg16/frozen_model_vgg_16.pb
+  inputs:
+    "input:0": [1, 240, 240, 3]
+  force_input_shape: True
+  outputs:
+     - vgg_16/fc8/BiasAdd:0
+
