@@ -1,11 +1,4 @@
 # -*- coding: utf-8 -*-
-# --------------------------------------
-# @Time    : 2018/5/16$ 14:48$
-# @Author  : KOD Chen
-# @Email   : 821237536@qq.com
-# @File    : utils$.py
-# Description :功能函数，包含：预处理输入图片、筛选边界框NMS、绘制筛选后的边界框。
-# --------------------------------------
 
 import random
 import colorsys
@@ -22,7 +15,7 @@ def preprocess_image(image, image_size=(416, 416)):
     image_rgb = cv2.cvtColor(image_cp, cv2.COLOR_BGR2RGB)
     image_resized = cv2.resize(image_rgb, image_size)
 
-    # normalize归一化
+    # normalize 归一化
     image_normalized = image_resized.astype(np.float32) / 225.0
 
     # 增加一个维度在第0维——batch_size
@@ -98,6 +91,7 @@ def draw_detection(im, bboxes, scores, cls_inds, labels, thr=0.3):
 
 
 ######################## 对应【2】:筛选解码后的回归边界框#########################################
+
 # (1)cut the box:将边界框超出整张图片(0,0)—(415,415)的部分cut掉
 def bboxes_cut(bbox_min_max, bboxes):
     bboxes = np.copy(bboxes)

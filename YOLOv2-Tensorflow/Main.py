@@ -19,12 +19,12 @@ import os.path
 import argparse
 
 MODEL_DIR = "yolov2_pb"
-MODEL_NAME = "frozen_yolov2.pb"
+MODEL_NAME = "frozen_yolov2_all.pb"
 
 
 def main():
     input_size = (416, 416)
-    image_file = 'E:\\Intenginetech\\onnx_model\\YOLOv2-Tensorflow\\yolo2_data\\detection_3.jpg'
+    image_file = r'yolo2_data/detection_500_1000.jpg'
     image = cv2.imread(image_file)
     image_shape = image.shape[:2]  # 只取wh，channel=3不取
     print("image_shape:", image_shape)
@@ -33,12 +33,14 @@ def main():
 
     # 【1】输入图片进入 darknet19 网络得到特征图，并进行解码得到：xmin xmax表示的边界框、置信度、类别概率
     tf_image = tf.placeholder(tf.float32, [1, input_size[0], input_size[1], 3], name="input")
-    model_output = darknet(tf_image)  # darknet19网络输出的特征图
+    model_output = darknet(tf_image)  # darknet19 网络输出的特征图
     output_sizes = input_size[0] // 32, input_size[1] // 32  # 特征图尺寸是图片下采样 32 倍
+    print("output_sizes", output_sizes)
+
     output_decoded = decode(model_output=model_output, output_sizes=output_sizes,
                             num_class=len(class_names), anchors=anchors)  # 解码
 
-    model_path = "E:\\Intenginetech\\onnx_model\\YOLOv2-Tensorflow\\checkpoint_dir\\yolo2_coco.ckpt"
+    model_path = r"checkpoint_dir\yolo2_coco.ckpt"
     saver = tf.train.Saver()
     with tf.Session() as sess:
         saver.restore(sess, model_path)
@@ -61,9 +63,8 @@ def freeze_graph(model_folder):
     print("input_checkpoint:", input_checkpoint)
     output_graph = os.path.join(MODEL_DIR, MODEL_NAME)  # PB模型保存路径
 
-
     input_size = (416, 416)
-    image_file = 'E:\\Intenginetech\\onnx_model\\YOLOv2-Tensorflow\\yolo2_data\\detection_3.jpg'
+    image_file =  r'yolo2_data/detection_500_1000.jpg'
     image = cv2.imread(image_file)
     image_shape = image.shape[:2]  # 只取wh，channel=3不取
 
@@ -77,7 +78,7 @@ def freeze_graph(model_folder):
     output_decoded = decode(model_output=model_output, output_sizes=output_sizes,
                             num_class=len(class_names), anchors=anchors)  # 解码
 
-    model_path = "E:\\Intenginetech\\onnx_model\\YOLOv2-Tensorflow\\checkpoint_dir\\yolo2_coco.ckpt"
+    model_path = r"checkpoint_dir/yolo2_coco.ckpt"
     saver = tf.train.Saver()
 
     graph = tf.get_default_graph()  # 获得默认的图
